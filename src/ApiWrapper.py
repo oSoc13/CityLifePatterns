@@ -45,13 +45,25 @@ class ApiWrapper:
         )
         resp = requests.get(url, params=params, verify=False)
         jsonData = resp.json()
-        userActions = jsonData["response"]["items"]
+        actionsJson = jsonData["response"]["items"]
+        userActions = list()
+        for action in actionsJson:
+            userActions.append(UserAction(action))
         return userActions
 
 
     # Gets spot info 
     def getSpotById(self, id):
         url = self.urls["spotByIdRequest"]
+        params = dict(
+                bearer_token = self.token,
+                spot_id = id
+        )
+        resp = requests.get(url, params=params, verify=False)
+        jsonData = resp.json()
+        spotJson = jsonData["response"]
+        return Spot(spotJson)
+
 
 
 class UserAction():
@@ -62,11 +74,25 @@ class UserAction():
     type = ""
     used_id = 0
 
-    def __init__(self, created_on, id, is_first, points, type, user_id):
-        self.created_on = created_on
-        self.id = id
-        self.is_first = is_first
-        self.points = points
-        self.type = type
-        self.user_id = user_id
+    def __init__(self, json):
+        self.created_on = json["created_on"]
+        self.id = json["id"]
+        self.is_first = json["is_first"]
+        self.points = json["points"]
+        self.type = json["type"]
+        self.user_id = json["user_id"]
         
+
+# TODO Read more spot data info from JSON (update as needed)
+class Spot():
+    id = 0
+    ll = [0.0,0.0]         # lat,long
+    name = ""
+    private = False
+
+    def __init__(self, json):
+        self.id = json["id"]
+        self.ll = [json["latitude"], json["longitude"]]
+        self.name = json["name"]
+        self.private = json["private"]  
+

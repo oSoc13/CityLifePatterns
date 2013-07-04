@@ -12,19 +12,11 @@ print "Testing..."
 
 api = ApiWrapper()
 
-
 '''
 userActions = api.getUserActions()
-print userActions[0]
+print userActions[0].type
 
-userAction = UserAction("1", 1, True, 200, "UserRegistered", 1000489)
-print userAction.created_on
-print userAction.id
-print userAction.is_first
-print userAction.points
-print userAction.type
-print userAction.user_id
+spot = api.getSpotById(382)
+print spot.name
 '''
-
-api.getSpotById(382)
 
