@@ -5,6 +5,7 @@ import functions
 
 
 countedSpotsArray = functions.getAllCountedSpots()
+functions.clearNextSpotsTable()
 
 for spot in countedSpotsArray:
     spotArray = functions.getNextSpots( spot )

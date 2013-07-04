@@ -27,3 +27,9 @@ def mostCheckedNextSpotList( nextSpotsArray ):
     
     returnedResults = DBQuery.writeDB( queryString )
     return returnedResults
+    
+def clearNextSpotsTable():
+    queryString = "TRUNCATE TABLE nextSpots;"
+    
+    returnedResults = DBQuery.writeDB( queryString )
+    return returnedResults
