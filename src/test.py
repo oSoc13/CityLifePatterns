@@ -1,16 +1,14 @@
 #!/usr/bin/python
 
-x = [1,2,3]
-y = [1,2,3]
+# Author: Linsey Raymaekers
+# Copyright OKFN Belgium
 
-if x == y:
-    print "True"
-else:
-    print "False"
+# Testing ApiWrapepr class
 
-if x is y:
-    print "True"
-else:
-    print "False"
+import ApiWrapper
 
+print "Testing..."
+api = ApiWrapper.ApiWrapper()
+print api.name
+api.helloWorld()
 
