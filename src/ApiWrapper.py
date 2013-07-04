@@ -12,20 +12,33 @@ import requests     # HTTP library
 class ApiWrapper:
     name = "Mobile Vikings API Wrapper"
     token = ""
-    userActionRequest = "https://alpha.vikingspots.com/en/api/4/users/actions/"
+    urls = dict()
+
 
 
     # Constructor
     def __init__(self):
+        # Read token from file
         file = open("vikingtoken")
         fileContents = file.read()
         entries = fileContents.split("=")
         self.token = entries[1]
 
+        # Read urls from file
+        file = open("urls")
+        lines = file.readlines()
+        for line in lines:
+            if (line.endswith("\n")):
+                line = line[:-2]
+            pair = line.split("=")
+            key = pair[0]
+            value = pair[1]
+            self.urls[key] = value
+
 
     # Returns array of user actions
     def getUserActions(self):
-        url = self.userActionRequest
+        url = self.urls["userActionRequest"]
         params = dict(
             bearer_token = self.token,
             max = 5
@@ -34,6 +47,11 @@ class ApiWrapper:
         jsonData = resp.json()
         userActions = jsonData["response"]["items"]
         return userActions
+
+
+    # Gets spot info 
+    def getSpotById(self, id):
+        url = self.urls["spotByIdRequest"]
 
 
 class UserAction():
