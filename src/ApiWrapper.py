@@ -1,14 +1,14 @@
 #!/usr/bin/python
-
+#
 # Author: Linsey Raymaekers
 # Copyright OKFN Belgium
 # 
-# This class is a wrapper for the VikingSpots API.
-#
-
+###################################
 import json
 import requests     # HTTP library
+###################################
 
+# This class is a wrapper for the VikingSpots API.
 class ApiWrapper:
     name = "Mobile Vikings API Wrapper"
     token = ""
@@ -37,11 +37,11 @@ class ApiWrapper:
 
 
     # Returns array of user actions
-    def getUserActions(self):
+    def getUserActions(self, nrActions):
         url = self.urls["userActionRequest"]
         params = dict(
             bearer_token = self.token,
-            max = 5
+            max = nrActions
         )
         resp = requests.get(url, params=params, verify=False)
         jsonData = resp.json()
@@ -65,22 +65,27 @@ class ApiWrapper:
         return Spot(spotJson)
 
 
-
+####################################
+# Data Classes 
+####################################
 class UserAction():
-    created_on = ""
     id = 0
+    created_on = ""
     is_first = False
     points = 0
     type = ""
-    used_id = 0
+    user_id = 0
+    spot_id = 0
 
     def __init__(self, json):
-        self.created_on = json["created_on"]
         self.id = json["id"]
+        self.created_on = json["created_on"]
         self.is_first = json["is_first"]
         self.points = json["points"]
         self.type = json["type"]
         self.user_id = json["user_id"]
+        if "spot_id" in json:
+            self.spot_id = json["spot_id"]
         
 
 # TODO Read more spot data info from JSON (update as needed)
