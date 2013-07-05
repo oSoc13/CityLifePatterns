@@ -21,7 +21,7 @@ def getNextSpots( spotId ):
     return spotArray
     
 
-def mostCheckedNextSpotList( nextSpotsArray ):
+def repopulateNextSpotList( nextSpotsArray ):
 
     queryString = "INSERT INTO  nextSpots VALUES ( '%s', '%s',  '%s',  '%s',  '%s',  '%s' );" % (nextSpotsArray[0], nextSpotsArray[1], nextSpotsArray[2],  nextSpotsArray[3], nextSpotsArray[4], nextSpotsArray[5])
     
