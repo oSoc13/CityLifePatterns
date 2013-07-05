@@ -37,7 +37,7 @@ class ApiWrapper:
 
 
     # Returns array of user actions
-    def getUserActions(self, nrActions):
+    def getUserActions(self, nrActions):    
         url = self.urls["userActionRequest"]
         params = dict(
             bearer_token = self.token,
