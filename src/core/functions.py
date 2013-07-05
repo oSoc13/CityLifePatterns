@@ -11,7 +11,7 @@ def getAllCountedSpots():
     return allTheCountedSpotsArray
 
 
-def getNextSpots( spotId ):
+def getTopNextSpots( spotId ):
     queryString = "SELECT nextSpotId, count FROM nextSpotCount WHERE spotId = %s ORDER BY count DESC LIMIT 0, 5" % spotId
     returnedResults = DBQuery.queryDB( queryString )
     spotArray = [ spotId ]
@@ -32,4 +32,13 @@ def clearNextSpotsTable():
     queryString = "TRUNCATE TABLE nextSpots;"
     
     returnedResults = DBQuery.writeDB( queryString )
+    return returnedResults
+## REPOPULATE PART ABOVE ####
+################################################################################
+## FCUNTIONS USED BY API UNDERNEATH ####
+
+def getNextSpots( spotId ):
+    queryString = "SELECT * FROM nextSpots WHERE spotId = %s" % spotId
+    returnedResults = DBQuery.queryDBSingleResponse( queryString )
+    
     return returnedResults

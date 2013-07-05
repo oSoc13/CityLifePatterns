@@ -8,7 +8,7 @@ countedSpotsArray = functions.getAllCountedSpots()
 functions.clearNextSpotsTable()
 
 for spot in countedSpotsArray:
-    spotArray = functions.getNextSpots( spot )
+    spotArray = functions.getTopNextSpots( spot )
     
     requiredZeros = 6 - len(spotArray)
     while (requiredZeros > 0):
