@@ -9,11 +9,10 @@ import requests     # HTTP library
 ###################################
 
 # This class is a wrapper for the VikingSpots API.
-class ApiWrapper:
+class VikingSpotsApiWrapper:
     name = "Mobile Vikings API Wrapper"
     token = ""
     urls = dict()
-
 
 
     # Constructor
