@@ -18,6 +18,7 @@ from WhatsNextApi import *
 ####################################
 print "Testing..."
 
+'''
 api = WhatsNextApi()
 checkins = api.getDayCheckins()
 print len(checkins)
@@ -25,6 +26,7 @@ print len(checkins)
 spotIds = list()
 for action in checkins:
     spotIds.append(action.spot_id)
+    '''
 
 
 

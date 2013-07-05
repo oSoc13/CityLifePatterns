@@ -24,7 +24,7 @@ class WhatsNextApi:
     # created_on format: %Y-%m-%d %H:%M:%S
     def occurredInLast24Hours(self, checkin):
         timeInSec = time.time()
-        time24HoursAgo = timeInSec - 24 * 60 * 60
+        time24HoursAgo = timeInSec - 24 * 60 * 60 * 30
         timeStr = datetime.datetime.fromtimestamp(time24HoursAgo).strftime('%Y-%m-%d %H:%M:%S')
         if timeStr < checkin.created_on:
             return True
@@ -39,7 +39,7 @@ class WhatsNextApi:
         userActions = self.vsApi.getUserActions(20)
         checkins = self.retrieveCheckinsFromActions(userActions)
         dayCheckins = list()
-        for checkin in checkins:
+        for checkin in userActions:
             if self.occurredInLast24Hours(checkin):
                 dayCheckins.append(checkin)
         return dayCheckins

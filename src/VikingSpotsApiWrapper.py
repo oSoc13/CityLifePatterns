@@ -6,6 +6,9 @@
 ###################################
 import json
 import requests     # HTTP library
+
+import os.path
+BASE = os.path.dirname(os.path.abspath(__file__))
 ###################################
 
 # This class is a wrapper for the VikingSpots API.
@@ -18,13 +21,15 @@ class VikingSpotsApiWrapper:
     # Constructor
     def __init__(self):
         # Read token from file
-        file = open("vikingtoken")
+        # file = open("vikingtoken") Doesn't work with Django, use os.path
+        file = open(os.path.join(BASE, "vikingtoken"))
         fileContents = file.read()
         entries = fileContents.split("=")
         self.token = entries[1]
 
         # Read urls from file
-        file = open("urls")
+        # file = open("urls") Doesn't work with Django, use os.path
+        file = open(os.path.join(BASE, "urls"))
         lines = file.readlines()
         for line in lines:
             if (line.endswith("\n")):
@@ -33,6 +38,7 @@ class VikingSpotsApiWrapper:
             key = pair[0]
             value = pair[1]
             self.urls[key] = value
+
 
 
     # Returns array of user actions

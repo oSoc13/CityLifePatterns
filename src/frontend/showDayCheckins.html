@@ -1,0 +1,13 @@
+<html>
+    <body>
+        <h1> Today's Checkins ({{ nrCheckins }})</h1>
+        {% for checkin in checkins %}
+        <li> 
+            Checkin Id {{ checkin.id }}
+            <li> Created on &nbsp; {{ checkin.created_on }}<\br> </li>
+            <li> Checkin Type &nbsp; {{ checkin.type }} </li>
+        </li>
+        </br>
+        {% endfor %}
+    </body>
+</html>
