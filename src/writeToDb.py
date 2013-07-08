@@ -20,7 +20,7 @@ def write( spotMapping ):
 		else:
 			QUERY= "INSERT INTO nextSpotCount VALUES (NULL ,  '%s',  '%s',  '%s');" % (tuple[0],tuple[1],value)
 			returnedStuff = DBQuery.writeDB( QUERY )
-			print returnedStuff
+			#print returnedStuff
 
 		#print "spotID: %s | nextID: %s | count: %s " % (tuple[0], tuple[1], value)
-	print "ending..."
+	#print "ending..."
