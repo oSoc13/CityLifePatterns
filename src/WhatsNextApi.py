@@ -15,14 +15,33 @@ class WhatsNextApi:
     vsApi = VikingSpotsApiWrapper() 
     lastRun = ""
 
-    # TODO test what happens when file doens't exist
+    ## Initialize and breakdown #######################################
     def __init__(self):
-        file = open(os.path.join(BASE, "lastrun"))
-        fileContents = file.read()
-        entries = fileContents.split(": ")
-        self.lastRun = entries[1]
+        filepath = os.path.join(BASE, "lastrun")
+        if os.path.exists(filepath):
+            file = open(filepath)
+            fileContents = file.read()
+            entries = fileContents.split(": ")
+            self.lastRun = entries[1]
+        else:
+            print "First run, will retrieve all checkin data..."
 
 
+    # Write current time to file 'lastrun'
+    def goingToRun(self):
+        file = open('lastrun','w')
+        now = time.time()
+        nowStr = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
+        contents = 'Night script was last run on: ' + nowStr
+        file.write(contents)
+
+
+    def runDone(self):
+        # TODO write away info about this run if needed
+        return
+
+
+    ###################################################################
     def retrieveCheckinsFromActions(self, userActions):
         checkins = list()
         for action in userActions:
@@ -36,16 +55,33 @@ class WhatsNextApi:
             return True
         return False
 
+    def getCheckinsAfterLastRun(self, checkins):
+        checkins = [checkin for checkin in checkins if self.occurredSinceLastRun(checkin)]
+        return checkins 
+
+    def containsCheckinsBeforeLastRun(self, checkins):
+        for checkin in checkins:
+            if checkin.created_on <= self.lastRun:
+                return True
+        return False
+
 
     # This function retrieves the checkins of the previous day, most recent last
-    # TODO: Function retrieves a set, limited amount of user actions for now,
-    #       should keep asking for more data until all data since last run was retrieved
+    # TODO when we're on a first run (lastRun == ""), get _all_ checkins
     def getDayCheckins(self):
-        userActions = self.vsApi.getUserActions(20) # TODO 
-        checkins = self.retrieveCheckinsFromActions(userActions)
         dayCheckins = list()
-        for checkin in userActions:
-            if self.occurredSinceLastRun(checkin):
+        allDayCheckinsRetrieved = False
+        skip = 0
+        # We loop until all checkins occurring after the last run are found
+        while not allDayCheckinsRetrieved: 
+            userActions = self.vsApi.getUserActions(20, skip) 
+            skip += len(userActions)
+            #checkins = self.retrieveCheckinsFromActions(userActions)
+            checkins = userActions
+            if self.containsCheckinsBeforeLastRun(checkins):
+                allDayCheckinsRetrieved = True
+                checkins = self.getCheckinsAfterLastRun(checkins)
+            for checkin in checkins: # TODO change to 'checkins' when working with real data
                 dayCheckins.append(checkin)
         dayCheckins = dayCheckins[::-1]
         return dayCheckins
@@ -58,17 +94,3 @@ class WhatsNextApi:
             if userId == nextCheckin.user_id:
                 return nextCheckin
         return None
-
-
-    # Write current time to file 'lastrun'
-    def goingToRun(self):
-        file = open('lastrun','w')
-        now = time.time()
-        nowStr = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
-        contents = 'Night script was last run on: ' + nowStr
-        file.write(contents)
-
-    def runDone(self):
-        # TODO write away info about this run if needed
-        return
-

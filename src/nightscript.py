@@ -31,6 +31,7 @@ for checkin in checkins:
             spotMapping[(spotId, nextSpotId)] = 1
     i += 1
 
+
 # TODO write data to database
 for each in spotMapping:
     print each

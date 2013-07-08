@@ -19,6 +19,13 @@ print "Testing..."
 
 api = WhatsNextApi()
 #api.writeLastRun()
+dayCheckins = api.getDayCheckins()
+
+print "printing..."
+for checkin in dayCheckins:
+    #checkin.toStr()
+    print checkin.created_on
+
 
 print "Terminating..."
 

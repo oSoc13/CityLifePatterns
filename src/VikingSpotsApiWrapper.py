@@ -42,11 +42,14 @@ class VikingSpotsApiWrapper:
 
 
     # Returns array of user actions
-    def getUserActions(self, nrActions):    
+    # nrActions: number of actions to return
+    # skip:      skips the x last actions
+    def getUserActions(self, nrActions, skip):    
         url = self.urls["userActionRequest"]
         params = dict(
             bearer_token = self.token,
-            max = nrActions
+            max = nrActions,
+            index = skip
         )
         resp = requests.get(url, params=params, verify=False)
         jsonData = resp.json()
@@ -92,6 +95,14 @@ class UserAction():
         self.user_id = json["user_id"]
         if "spot_id" in json:
             self.spot_id = json["spot_id"]
+
+    def toStr(self):
+        print "id: %d" % self.id
+        print "created_on: %s" % self.created_on
+        print "points: %d" % self.points
+        print "type: %s" % self.type
+        print "user_id: %d" % self.user_id
+        print "spot_id: %d" % self.spot_id
         
 
 # TODO Read more spot data info from JSON (update as needed)
