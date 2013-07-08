@@ -73,6 +73,7 @@ class VikingSpotsApiWrapper:
 ####################################
 # Data Classes 
 ####################################
+
 class UserAction():
     id = 0
     created_on = ""

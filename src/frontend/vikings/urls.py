@@ -9,8 +9,6 @@ from vikings.views import *
 
 urlpatterns = patterns('',
 
-    url(r'^hello/$', hello),
-    url(r'^time/$', current_datetime),
     url(r'^api/checkins/day/$', showDayCheckins)
 
     # Example:

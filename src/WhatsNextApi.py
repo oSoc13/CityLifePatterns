@@ -21,6 +21,7 @@ class WhatsNextApi:
                 checkins.append(action)
         return checkins
 
+    # TODO rewrite to "occurredSinceLastRun()
     # created_on format: %Y-%m-%d %H:%M:%S
     def occurredInLast24Hours(self, checkin):
         timeInSec = time.time()
@@ -30,16 +31,30 @@ class WhatsNextApi:
             return True
         return False
 
-    # Timespan specifies how far back the user actions go
-    # E.g. timespan = 24 returns user actions made in the last 24 hours
+    # This function retrieves the checkins of the previous day, most recent last
     # TODO: Function retrieves a set, limited amount of user actions for now,
-    #       should keep asking for more data until actions go further back 
-    #       than the given timespan.
+    #       should keep asking for more data until all data from last 24 hours was retrieved
     def getDayCheckins(self):
-        userActions = self.vsApi.getUserActions(20)
+        userActions = self.vsApi.getUserActions(20) # TODO 
         checkins = self.retrieveCheckinsFromActions(userActions)
         dayCheckins = list()
         for checkin in userActions:
             if self.occurredInLast24Hours(checkin):
                 dayCheckins.append(checkin)
+        dayCheckins = dayCheckins[::-1]
         return dayCheckins
+
+    def countNextSpots(self):
+        return
+
+    # For each checkin, get the next checkin by same user
+    # Checkins are already sorted by date (most recent last)
+    def findNextCheckin(self, checkin, checkins):
+        for nextCheckin in checkins:
+            if checkin.user_id == nextCheckin.user_id:
+                return nextCheckin
+        return None
+
+
+        
+
