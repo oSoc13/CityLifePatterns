@@ -6,6 +6,7 @@
 ###################################
 import json
 import requests     # HTTP library
+import datetime
 
 import os.path
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -45,6 +46,7 @@ class VikingSpotsApiWrapper:
     # nrActions: number of actions to return
     # skip:      skips the x last actions
     def getUserActions(self, nrActions, skip):    
+        ''' # This code calls the VikingSpots Api, but we're using a local data set
         url = self.urls["userActionRequest"]
         params = dict(
             bearer_token = self.token,
@@ -53,10 +55,21 @@ class VikingSpotsApiWrapper:
         )
         resp = requests.get(url, params=params, verify=False)
         jsonData = resp.json()
+        '''
+        print "Reading user actions..."
+        jsonFile = open(os.path.join(BASE, "checkInActions.json"))
+        jsonData = json.load(jsonFile)
         actionsJson = jsonData["response"]["items"]
         userActions = list()
         for action in actionsJson:
-            userActions.append(UserAction(action))
+            actionObject = UserAction(action)
+            dt = datetime.datetime.strptime(actionObject.created_on, '%Y-%m-%d %H:%M:%S')
+            str = dt.strftime('%Y-%m-%d %H:%M:%S')
+            actionObject.created_on = str
+            userActions.append(actionObject)
+        print "User Actions read"
+        # Sort actions (local data is not sorted by created_on
+        userActions.sort(key=lambda userAction: userAction.created_on)
         return userActions
 
 

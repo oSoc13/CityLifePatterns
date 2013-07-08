@@ -6,8 +6,9 @@
 ###################################
 import VikingSpotsApiWrapper
 from VikingSpotsApiWrapper import *
-import time                 # occurredInLast24Hours()
-import datetime             # occurredInLast24Hours()
+import time                
+import datetime             
+import calendar
 ###################################
 
 
@@ -23,6 +24,8 @@ class WhatsNextApi:
             fileContents = file.read()
             entries = fileContents.split(": ")
             self.lastRun = entries[1]
+            if (self.lastRun.endswith("\n")):
+                self.lastRun = self.lastRun[:-1]
         else:
             print "First run, will retrieve all checkin data..."
 
@@ -49,7 +52,6 @@ class WhatsNextApi:
                 checkins.append(action)
         return checkins
 
-
     def occurredSinceLastRun(self, checkin):
         if self.lastRun < checkin.created_on:
             return True
@@ -68,6 +70,30 @@ class WhatsNextApi:
 
     # This function retrieves the checkins of the previous day, most recent last
     # TODO when we're on a first run (lastRun == ""), get _all_ checkins
+    # This version runs when using local checkin data
+
+    # TODO
+    def getDayCheckins(self):
+        dayCheckins = list()
+        allDayCheckinsRetrieved = False
+        allCheckins = self.vsApi.getUserActions(0,0)
+        end = len(allCheckins)
+        start = end - 20
+        # We loop until all checkins occurring after the last run are found
+        while not allDayCheckinsRetrieved: 
+            checkins = allCheckins[start::end]
+            if self.containsCheckinsBeforeLastRun(checkins):
+                allDayCheckinsRetrieved = True
+                checkins = self.getCheckinsAfterLastRun(checkins)
+            for checkin in checkins: 
+                dayCheckins.append(checkin)
+            start -= 20
+            end -= 20
+
+        dayCheckins = dayCheckins[::-1]
+        return dayCheckins
+
+    ''' # This version should when vsApi.getUseractions() gets data from VikingSpotsApi
     def getDayCheckins(self):
         dayCheckins = list()
         allDayCheckinsRetrieved = False
@@ -77,14 +103,15 @@ class WhatsNextApi:
             userActions = self.vsApi.getUserActions(20, skip) 
             skip += len(userActions)
             #checkins = self.retrieveCheckinsFromActions(userActions)
-            checkins = userActions
+            checkins = userActions # TODO change to 'checkins' when working with real data
             if self.containsCheckinsBeforeLastRun(checkins):
                 allDayCheckinsRetrieved = True
                 checkins = self.getCheckinsAfterLastRun(checkins)
-            for checkin in checkins: # TODO change to 'checkins' when working with real data
+            for checkin in checkins: 
                 dayCheckins.append(checkin)
         dayCheckins = dayCheckins[::-1]
         return dayCheckins
+    '''
 
 
     # For each checkin, get the next checkin by same user
