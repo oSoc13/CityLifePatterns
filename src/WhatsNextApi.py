@@ -13,6 +13,15 @@ import datetime             # occurredInLast24Hours()
 
 class WhatsNextApi:
     vsApi = VikingSpotsApiWrapper() 
+    lastRun = ""
+
+    # TODO test what happens when file doens't exist
+    def __init__(self):
+        file = open(os.path.join(BASE, "lastrun"))
+        fileContents = file.read()
+        entries = fileContents.split(": ")
+        self.lastRun = entries[1]
+
 
     def retrieveCheckinsFromActions(self, userActions):
         checkins = list()
@@ -21,40 +30,45 @@ class WhatsNextApi:
                 checkins.append(action)
         return checkins
 
-    # TODO rewrite to "occurredSinceLastRun()
-    # created_on format: %Y-%m-%d %H:%M:%S
-    def occurredInLast24Hours(self, checkin):
-        timeInSec = time.time()
-        time24HoursAgo = timeInSec - 24 * 60 * 60 * 30
-        timeStr = datetime.datetime.fromtimestamp(time24HoursAgo).strftime('%Y-%m-%d %H:%M:%S')
-        if timeStr < checkin.created_on:
+
+    def occurredSinceLastRun(self, checkin):
+        if self.lastRun < checkin.created_on:
             return True
         return False
 
+
     # This function retrieves the checkins of the previous day, most recent last
     # TODO: Function retrieves a set, limited amount of user actions for now,
-    #       should keep asking for more data until all data from last 24 hours was retrieved
+    #       should keep asking for more data until all data since last run was retrieved
     def getDayCheckins(self):
         userActions = self.vsApi.getUserActions(20) # TODO 
         checkins = self.retrieveCheckinsFromActions(userActions)
         dayCheckins = list()
         for checkin in userActions:
-            if self.occurredInLast24Hours(checkin):
+            if self.occurredSinceLastRun(checkin):
                 dayCheckins.append(checkin)
         dayCheckins = dayCheckins[::-1]
         return dayCheckins
 
-    def countNextSpots(self):
-        return
 
     # For each checkin, get the next checkin by same user
     # Checkins are already sorted by date (most recent last)
-    def findNextCheckin(self, checkin, checkins):
+    def findNextCheckin(self, userId, checkins):
         for nextCheckin in checkins:
-            if checkin.user_id == nextCheckin.user_id:
+            if userId == nextCheckin.user_id:
                 return nextCheckin
         return None
 
 
-        
+    # Write current time to file 'lastrun'
+    def goingToRun(self):
+        file = open('lastrun','w')
+        now = time.time()
+        nowStr = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
+        contents = 'Night script was last run on: ' + nowStr
+        file.write(contents)
+
+    def runDone(self):
+        # TODO write away info about this run if needed
+        return
 

@@ -11,6 +11,7 @@ from WhatsNextApi import *
 ###################################
 
 api = WhatsNextApi()
+#api.goingToRun()  
 
 checkins = api.getDayCheckins()
 spotIds = []
@@ -20,7 +21,7 @@ i = 0   # Used to select checkins after current checkin
 
 # Build a local cache of spot mappings
 for checkin in checkins:
-    nextCheckin = api.findNextCheckin(checkin, checkins[i+1::])
+    nextCheckin = api.findNextCheckin(checkin.user_id, checkins[i+1::])
     if nextCheckin is not None:
         spotId = checkin.spot_id
         nextSpotId = nextCheckin.spot_id
@@ -35,3 +36,4 @@ for each in spotMapping:
     print each
     print spotMapping[each]
 
+api.runDone()

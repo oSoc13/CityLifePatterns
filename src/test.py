@@ -17,6 +17,8 @@ from WhatsNextApi import *
 ####################################
 print "Testing..."
 
+api = WhatsNextApi()
+#api.writeLastRun()
 
 print "Terminating..."
 
