@@ -6,11 +6,12 @@
 # This is the night script that is responsible for updating the WhatsNext database.
 #
 ###################################
-import WhatsNextApi
-from WhatsNextApi import *
 import sys
 sys.path.insert(0, './core')    # Specify additional directory to load python modules from
+sys.path.insert(0, './modules')   
 import writeToDb
+import WhatsNextApi
+from WhatsNextApi import *
 ###################################
 
 # Builds a local cache of spot mappings
