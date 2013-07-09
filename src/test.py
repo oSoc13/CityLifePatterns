@@ -19,20 +19,19 @@ from VikingSpotsApiWrapper import *
 ####################################
 print "Testing..."
 
+'''
 api = WhatsNextApi()
 #api.writeLastRun()
 dayCheckins = api.getDayCheckins()
 print "nr day checkins %d" % len(dayCheckins)
 
 print "printing..."
-#for checkin in dayCheckins:
-    #checkin.toStr()
-    #print checkin.created_on
-
+for checkin in dayCheckins:
+    print checkin.created_on
 '''
 api = VikingSpotsApiWrapper()
 checkins = api.getUserActions(0,0)
-'''
+print checkins[0].created_on
 
 
 

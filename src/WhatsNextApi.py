@@ -71,29 +71,43 @@ class WhatsNextApi:
     # This function retrieves the checkins of the previous day, most recent last
     # TODO when we're on a first run (lastRun == ""), get _all_ checkins
     # This version runs when using local checkin data
-
     # TODO
     def getDayCheckins(self):
         dayCheckins = list()
         allDayCheckinsRetrieved = False
         allCheckins = self.vsApi.getUserActions(0,0)
         end = len(allCheckins)
-        start = end - 20
+        windowSize = 100
+        start = end - windowSize
         # We loop until all checkins occurring after the last run are found
         while not allDayCheckinsRetrieved: 
-            checkins = allCheckins[start::end]
+            checkins = allCheckins[start:end]  
+            checkins.sort(key=lambda userAction: userAction.created_on)
+            checkins.reverse()
             if self.containsCheckinsBeforeLastRun(checkins):
                 allDayCheckinsRetrieved = True
                 checkins = self.getCheckinsAfterLastRun(checkins)
-            for checkin in checkins: 
-                dayCheckins.append(checkin)
-            start -= 20
-            end -= 20
+            dayCheckins.extend(checkins)   
+            start -= windowSize
+            end -= windowSize
 
-        dayCheckins = dayCheckins[::-1]
+        dayCheckins.reverse()
         return dayCheckins
 
-    ''' # This version should when vsApi.getUseractions() gets data from VikingSpotsApi
+
+    # Function to read all checkin date before a given date
+    # Used to initialize the database with checkin data
+    def getCheckinsBefore(self, date):
+        allCheckins = self.vsApi.getUserActions(0,0)
+        i = 0
+        for checkin in allCheckins:
+            if checkin.created_on >= date:
+                break
+            i += 1
+        return allCheckins[:i]
+
+
+    ''' # This version should run when vsApi.getUseractions() gets data from the VikingSpotsApi
     def getDayCheckins(self):
         dayCheckins = list()
         allDayCheckinsRetrieved = False

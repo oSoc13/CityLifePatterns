@@ -5,10 +5,18 @@ import sys
 from dbconfig import *
 
 con = object()
+cur = object()
+
+def openConnection():
+    global con 
+    con = mdb.connect(host, user, passw, db)
+
+
+def closeConnection():
+    con.close()
 
 def queryDB( str ):
     try:
-        con = mdb.connect(host, user, passw, db)
         cur = con.cursor()
         cur.execute(str)
         returnedResults = cur.fetchall()
@@ -18,13 +26,10 @@ def queryDB( str ):
         return "Error %d: %s" % (e.args[0],e.args[1])
         sys.exit(1)
         
-    finally:    
-        if con:    
-            con.close()
             
 def queryDBSingleResponse( str ):
+    global con
     try:
-        con = mdb.connect(host, user, passw, db)
         cur = con.cursor()
         cur.execute(str)
         returnedResults = cur.fetchone()
@@ -33,18 +38,12 @@ def queryDBSingleResponse( str ):
     except mdb.Error, e:
         return "Error %d: %s" % (e.args[0],e.args[1])
         sys.exit(1)
-        
-    finally:    
-        if con:    
-            con.close()
-
 
 def writeDB ( str ):
-    con = mdb.connect(host, user, passw, db)
-    cur = con.cursor()
+    global con
     try:
+       cur = con.cursor()
        cur.execute( str )
        con.commit()
     except:
        con.rollback()
-    con.close()
