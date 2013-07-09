@@ -17,22 +17,23 @@ api = WhatsNextApi()
 #api.goingToRun()  
 
 print "Getting day checkins..."
-checkins = api.getDayCheckins()
+#checkins = api.getDayCheckins()
+checkins = api.getCheckinsBefore("2012-12-31 00:00:00")
 print "Got %d day checkins." % len(checkins)
+
 spotIds = []
 nextSpotIds = []
 spotMapping = {}
 i = 0   # Used to select checkins after current checkin
 
-for checkin in checkins:
-    print checkin.created_on
+print "First checkin on %s" % checkins[0].created_on
+print "Last checkin on %s" % checkins[len(checkins)-1].created_on
 
-'''
 # Build a local cache of spot mappings
 print "Processing checkins..."
 print "Nr of checkins = %d" % len(checkins)
 for checkin in checkins:
-    if i % 1000 == 0:
+    if i % 1000  == 0:
         print "At checkin %d" % i
     nextCheckin = api.findNextCheckin(checkin.user_id, checkins[i+1::])
     if nextCheckin is not None:
@@ -43,17 +44,10 @@ for checkin in checkins:
         else:
             spotMapping[(spotId, nextSpotId)] = 1
     i += 1
-
 print "Done processing!"
-'''
 
 print "Writing to DB..."
-#writeToDb.write(spotMapping)
-'''
-for each in spotMapping:
-    print each
-    print spotMapping[each]
-'''
+writeToDb.write(spotMapping)
 print "Done writing to DB!" 
 
 api.runDone()
