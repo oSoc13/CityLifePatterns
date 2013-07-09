@@ -12,7 +12,11 @@ sys.path.insert(0, './modules')
 import writeToDb
 import WhatsNextApi
 from WhatsNextApi import *
+import os.path
 ###################################
+
+baseDir = os.path.dirname(os.path.abspath(__file__))
+api = WhatsNextApi(baseDir)
 
 # Builds a local cache of spot mappings
 def processCheckins(dayCheckins):
@@ -35,10 +39,21 @@ def processCheckins(dayCheckins):
         i += 1
     print "Done processing!"
     return spotMapping
+  
+# Write current time to file 'lastrun'
+def nightScriptStart():
+    filepath = os.path.join(baseDir, "lastrun")
+    file = open(filepath, 'w')
+    contents = 'Night script was last run on: ' + api.endOfCurrentRun
+    file.write(contents)
+
+
+# Write away info about this run if necessary
+def nightScriptEnd():
+    return
 
 ## Main #######################################
-api = WhatsNextApi()
-api.goingToRun()  
+nightScriptStart()
 
 print "\nLast run: %s" % api.lastRun
 print "End of current run: %s" % api.endOfCurrentRun
@@ -62,6 +77,8 @@ if nrCheckins > 0:
 else:
     print "\nThere were no checkins today"
 
-api.runDone()
+nightScriptEnd()
 print "\nTerminating..."
 ###################################################################
+
+

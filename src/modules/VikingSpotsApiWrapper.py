@@ -9,8 +9,9 @@ import requests     # HTTP library
 import datetime
 
 import os.path
-BASE = os.path.dirname(os.path.abspath(__file__))
 ###################################
+
+modulesDir = os.path.dirname(os.path.abspath(__file__))
 
 # This class is a wrapper for the VikingSpots API.
 class VikingSpotsApiWrapper:
@@ -23,14 +24,14 @@ class VikingSpotsApiWrapper:
     def __init__(self):
         # Read token from file
         # file = open("vikingtoken") Doesn't work with Django, use os.path
-        file = open(os.path.join(BASE, "vikingtoken"))
+        file = open(os.path.join(modulesDir, "vikingtoken"))
         fileContents = file.read()
         entries = fileContents.split("=")
         self.token = entries[1]
 
         # Read urls from file
         # file = open("urls") Doesn't work with Django, use os.path
-        file = open(os.path.join(BASE, "urls"))
+        file = open(os.path.join(modulesDir, "urls"))
         lines = file.readlines()
         for line in lines:
             if (line.endswith("\n")):
@@ -56,7 +57,7 @@ class VikingSpotsApiWrapper:
         resp = requests.get(url, params=params, verify=False)
         jsonData = resp.json()
         '''
-        jsonFile = open(os.path.join(BASE, "checkInActions.json"))
+        jsonFile = open(os.path.join(modulesDir, "checkInActions.json"))
         jsonData = json.load(jsonFile)
         actionsJson = jsonData["response"]["items"]
         userActions = list()

@@ -11,18 +11,18 @@ import datetime
 import calendar
 
 import os.path
-BASE = os.path.dirname(os.path.abspath(__file__))
 ###################################
 
+modulesDir = os.path.dirname(os.path.abspath(__file__))
 
 class WhatsNextApi:
     vsApi = VikingSpotsApiWrapper() 
     lastRun = ""            # End of last run (date)
     endOfCurrentRun = ""
 
-    ## Initialize and breakdown #######################################
-    def __init__(self):
-        filepath = os.path.join(BASE, "lastrun")
+    ## Initialize  ####################################################
+    def __init__(self, baseDir):
+        filepath = os.path.join(baseDir, "lastrun")
         if os.path.exists(filepath):
             file = open(filepath)
             fileContents = file.read()
@@ -35,26 +35,6 @@ class WhatsNextApi:
             self.endOfCurrentRun = endDate.strftime("%Y-%m-%d %H:%M:%S")
         else:
             print "First run, will retrieve all checkin data..."
-
-
-    # Write current time to file 'lastrun'
-    def goingToRun(self):
-        filepath = os.path.join(BASE, "lastrun")
-        file = open(filepath, 'w')
-        ''' # This code can be used to write the current time to the file
-        now = time.time()
-        nowStr = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
-        ''' 
-        # But we're reading day checkins from dates further in past (local data dump),
-        # write date that is a day further than the last run
-        nowStr = self.endOfCurrentRun
-        contents = 'Night script was last run on: ' + nowStr
-        file.write(contents)
-
-
-    def runDone(self):
-        # TODO write away info about this run if needed
-        return
     ###################################################################
 
 
