@@ -20,6 +20,7 @@ class WhatsNextApi:
     lastRun = ""            # End of last run (date)
     endOfCurrentRun = ""
 
+
     ## Initialize  ####################################################
     def __init__(self, baseDir):
         filepath = os.path.join(baseDir, "lastrun")
@@ -38,6 +39,8 @@ class WhatsNextApi:
     ###################################################################
 
 
+    ## NIGHT SCRIPT  ##################################################
+    ##################### Private functions ###########################
     def retrieveCheckinsFromActions(self, userActions):
         checkins = list()
         for action in userActions:
@@ -67,9 +70,8 @@ class WhatsNextApi:
     def omitCheckinsAfterEndOfCurrentRun(self, checkins):
         checkins = [checkin for checkin in checkins if checkin.created_on < self.endOfCurrentRun]
         return checkins
-    
 
-
+    ##################### Public functions ##########################
     # This function retrieves the checkins of the previous day, most recent last
     # 'Today' is determined by lastRun and endOfCurrentRun(=24 hours ahead)
     # This allows us to simulate the adding of new checkins per day
@@ -80,18 +82,13 @@ class WhatsNextApi:
         dayCheckins = self.omitCheckinsAfterEndOfCurrentRun(allCheckins)
         return dayCheckins
 
-
-    # Reads all checkin data before a given date
-    # Used to initialize the database with checkin data
-    def getCheckinsBefore(self, date):
-        allCheckins = self.vsApi.getUserActions(0,0)
-        i = 0
-        for checkin in allCheckins:
-            if checkin.created_on >= date:
-                break
-            i += 1
-        return allCheckins[:i]
-
+    # For each checkin, get the next checkin by same user
+    # Checkins are already sorted by date (most recent last)
+    def findNextCheckin(self, userId, checkins):
+        for nextCheckin in checkins:
+            if userId == nextCheckin.user_id:
+                return nextCheckin
+        return None
 
     ''' # This version should run when vsApi.getUseractions() gets data from the VikingSpotsApi
     def getDayCheckins(self):
@@ -112,15 +109,17 @@ class WhatsNextApi:
         dayCheckins = dayCheckins[::-1]
         return dayCheckins
     '''
+    ###################################################################
 
 
-    # For each checkin, get the next checkin by same user
-    # Checkins are already sorted by date (most recent last)
-    def findNextCheckin(self, userId, checkins):
-        for nextCheckin in checkins:
-            if userId == nextCheckin.user_id:
-                return nextCheckin
-        return None
 
+    ## DAY SCRIPT  ####################################################
+
+    ###################################################################
+
+
+
+    ## MISC.  #########################################################
     def getSpotById(self, id):
         return self.vsApi.getSpotById(id)
+    ###################################################################
