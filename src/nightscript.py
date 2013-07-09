@@ -13,41 +13,54 @@ sys.path.insert(0, './core')    # Specify additional directory to load python mo
 import writeToDb
 ###################################
 
+# Builds a local cache of spot mappings
+def processCheckins(dayCheckins):
+    print "\nProcessing checkins..."
+    spotIds = []
+    nextSpotIds = []
+    spotMapping = {}
+    i = 0   # Used to select checkins after current checkin
+    for checkin in dayCheckins:
+        nextCheckin = api.findNextCheckin(checkin.user_id, dayCheckins[i+1::])
+        if nextCheckin is not None:
+            spotId = checkin.spot_id
+            nextSpotId = nextCheckin.spot_id
+            if (spotId, nextSpotId) in spotMapping:
+                spotMapping[(spotId, nextSpotId)] += 1
+                print "Mapping inc: (%d,%d)" % (spotId, nextSpotId)
+            else:
+                spotMapping[(spotId, nextSpotId)] = 1
+                print "New mapping: (%d,%d)" % (spotId, nextSpotId)
+        i += 1
+    print "Done processing!"
+    return spotMapping
+
+## Main #######################################
 api = WhatsNextApi()
-#api.goingToRun()  
+api.goingToRun()  
 
-print "Getting day checkins..."
-#checkins = api.getDayCheckins()
-checkins = api.getCheckinsBefore("2012-12-31 00:00:00")
-print "Got %d day checkins." % len(checkins)
+print "\nLast run: %s" % api.lastRun
+print "End of current run: %s" % api.endOfCurrentRun
 
-spotIds = []
-nextSpotIds = []
-spotMapping = {}
-i = 0   # Used to select checkins after current checkin
+print "\nGetting day checkins..."
+dayCheckins = api.getDayCheckins()
+nrCheckins = len(dayCheckins)
 
-print "First checkin on %s" % checkins[0].created_on
-print "Last checkin on %s" % checkins[len(checkins)-1].created_on
-
-# Build a local cache of spot mappings
-print "Processing checkins..."
-print "Nr of checkins = %d" % len(checkins)
-for checkin in checkins:
-    if i % 1000  == 0:
-        print "At checkin %d" % i
-    nextCheckin = api.findNextCheckin(checkin.user_id, checkins[i+1::])
-    if nextCheckin is not None:
-        spotId = checkin.spot_id
-        nextSpotId = nextCheckin.spot_id
-        if (spotId, nextSpotId) in spotMapping:
-            spotMapping[(spotId, nextSpotId)] += 1
-        else:
-            spotMapping[(spotId, nextSpotId)] = 1
-    i += 1
-print "Done processing!"
-
-print "Writing to DB..."
-writeToDb.write(spotMapping)
-print "Done writing to DB!" 
+if nrCheckins > 0:
+    print "\nGot %d day checkins" % nrCheckins
+    print "First checkin:  %s" % dayCheckins[0].created_on
+    print "Last checkin: %s" % dayCheckins[nrCheckins-1].created_on
+    spotMapping = processCheckins(dayCheckins)
+    if len(spotMapping) > 0:
+        print "\n%d spot mappings found" % len(spotMapping)
+        print "\nWriting to DB..."
+        writeToDb.write(spotMapping)
+        print "Done writing to DB!" 
+    else:
+        print "\nNo spot mappings found today."
+else:
+    print "\nThere were no checkins today"
 
 api.runDone()
+print "\nTerminating..."
+###################################################################

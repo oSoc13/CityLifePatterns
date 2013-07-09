@@ -56,7 +56,6 @@ class VikingSpotsApiWrapper:
         resp = requests.get(url, params=params, verify=False)
         jsonData = resp.json()
         '''
-        print "Reading user actions..."
         jsonFile = open(os.path.join(BASE, "checkInActions.json"))
         jsonData = json.load(jsonFile)
         actionsJson = jsonData["response"]["items"]
@@ -64,11 +63,10 @@ class VikingSpotsApiWrapper:
         for action in actionsJson:
             actionObject = UserAction(action)
             dt = datetime.datetime.strptime(actionObject.created_on, '%Y-%m-%d %H:%M:%S')
-            str = dt.strftime('%Y-%m-%d %H:%M:%S')
+            str = dt.strftime('%Y-%m-%d %H:%M:%S') # Add leading zeros
             actionObject.created_on = str
             userActions.append(actionObject)
-        print "User Actions read"
-        # Sort actions (local data is not sorted by created_on
+        # Sort actions (local data is not sorted by created_on)
         userActions.sort(key=lambda userAction: userAction.created_on)
         return userActions
 

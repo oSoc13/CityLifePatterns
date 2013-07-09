@@ -14,7 +14,8 @@ import calendar
 
 class WhatsNextApi:
     vsApi = VikingSpotsApiWrapper() 
-    lastRun = ""
+    lastRun = ""            # End of last run (date)
+    endOfCurrentRun = ""
 
     ## Initialize and breakdown #######################################
     def __init__(self):
@@ -26,6 +27,9 @@ class WhatsNextApi:
             self.lastRun = entries[1]
             if (self.lastRun.endswith("\n")):
                 self.lastRun = self.lastRun[:-1]
+            date = datetime.datetime.strptime(self.lastRun, '%Y-%m-%d %H:%M:%S')
+            endDate = date + datetime.timedelta(days=1)
+            self.endOfCurrentRun = endDate.strftime("%Y-%m-%d %H:%M:%S")
         else:
             print "First run, will retrieve all checkin data..."
 
@@ -33,8 +37,13 @@ class WhatsNextApi:
     # Write current time to file 'lastrun'
     def goingToRun(self):
         file = open('lastrun','w')
+        ''' # This code can be used to write the current time to the file
         now = time.time()
         nowStr = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
+        ''' 
+        # But we're reading day checkins from dates further in past (local data dump),
+        # write date that is a day further than the last run
+        nowStr = self.endOfCurrentRun
         contents = 'Night script was last run on: ' + nowStr
         file.write(contents)
 
@@ -42,9 +51,9 @@ class WhatsNextApi:
     def runDone(self):
         # TODO write away info about this run if needed
         return
-
-
     ###################################################################
+
+
     def retrieveCheckinsFromActions(self, userActions):
         checkins = list()
         for action in userActions:
@@ -67,35 +76,28 @@ class WhatsNextApi:
                 return True
         return False
 
+    def omitCheckinsBeforeLastRun(self, checkins):
+        checkins = [checkin for checkin in checkins if self.lastRun < checkin.created_on]
+        return checkins
+
+    def omitCheckinsAfterEndOfCurrentRun(self, checkins):
+        checkins = [checkin for checkin in checkins if checkin.created_on < self.endOfCurrentRun]
+        return checkins
+    
+
 
     # This function retrieves the checkins of the previous day, most recent last
-    # TODO when we're on a first run (lastRun == ""), get _all_ checkins
-    # This version runs when using local checkin data
-    # TODO
+    # 'Today' is determined by lastRun and endOfCurrentRun(=24 hours ahead)
+    # This allows us to simulate the adding of new checkins per day
+    # Note: SQL Dump has all checkins before 2012-03-12 00:00:00
     def getDayCheckins(self):
-        dayCheckins = list()
-        allDayCheckinsRetrieved = False
         allCheckins = self.vsApi.getUserActions(0,0)
-        end = len(allCheckins)
-        windowSize = 100
-        start = end - windowSize
-        # We loop until all checkins occurring after the last run are found
-        while not allDayCheckinsRetrieved: 
-            checkins = allCheckins[start:end]  
-            checkins.sort(key=lambda userAction: userAction.created_on)
-            checkins.reverse()
-            if self.containsCheckinsBeforeLastRun(checkins):
-                allDayCheckinsRetrieved = True
-                checkins = self.getCheckinsAfterLastRun(checkins)
-            dayCheckins.extend(checkins)   
-            start -= windowSize
-            end -= windowSize
-
-        dayCheckins.reverse()
+        allCheckins = self.omitCheckinsBeforeLastRun(allCheckins)
+        dayCheckins = self.omitCheckinsAfterEndOfCurrentRun(allCheckins)
         return dayCheckins
 
 
-    # Function to read all checkin date before a given date
+    # Reads all checkin data before a given date
     # Used to initialize the database with checkin data
     def getCheckinsBefore(self, date):
         allCheckins = self.vsApi.getUserActions(0,0)
@@ -135,3 +137,6 @@ class WhatsNextApi:
             if userId == nextCheckin.user_id:
                 return nextCheckin
         return None
+
+    def getSpotById(self, id):
+        return self.vsApi.getSpotById(id)
