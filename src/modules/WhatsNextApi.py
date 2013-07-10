@@ -14,8 +14,7 @@ class WhatsNextApi:
     lastRun = ""
     endOfCurrentRun = ""
 
-    ## NIGHT SCRIPT  ##################################################
-    ##################### Private functions ###########################
+    ## Building the database  #########################################
     def retrieveCheckinsFromActions(self, userActions):
         checkins = list()
         for action in userActions:
@@ -46,7 +45,8 @@ class WhatsNextApi:
         checkins = [checkin for checkin in checkins if checkin.created_on < self.endOfCurrentRun]
         return checkins
 
-    ##################### Public functions ##########################
+    ######
+
     # This function retrieves the checkins of the previous day, most recent last
     # 'Today' is determined by lastRun and endOfCurrentRun(=24 hours ahead)
     # This allows us to simulate the adding of new checkins per day
@@ -57,6 +57,11 @@ class WhatsNextApi:
         dayCheckins = self.omitCheckinsAfterEndOfCurrentRun(allCheckins)
         return dayCheckins
 
+    def getAllCheckinsBeforeDate(self, date):
+        allCheckins = self.vsApi.getUserActions(0,0)
+        checkins = [checkin for checkin in allCheckins if checkin.created_on < date]
+        return checkins
+
     # For each checkin, get the next checkin by same user
     # Checkins are already sorted by date (most recent last)
     def findNextCheckin(self, userId, checkins):
@@ -64,6 +69,31 @@ class WhatsNextApi:
             if userId == nextCheckin.user_id:
                 return nextCheckin
         return None
+
+    # Builds a spot mapping from the given checkins based on occurrence count
+    def buildSpotMapping(self, checkins):
+        print "\nProcessing checkins..."
+        spotIds = []
+        nextSpotIds = []
+        spotMapping = {}
+        i = 0   # Used to select checkins after current checkin
+        for checkin in checkins:
+            if i % 1000 == 0:
+                print "Processing checkin %d..." % i
+            i += 1
+            nextCheckin = self.findNextCheckin(checkin.user_id, checkins[i+1:])
+            if nextCheckin is not None and not checkin.spot_id == nextCheckin.spot_id:
+                spotId = checkin.spot_id
+                nextSpotId = nextCheckin.spot_id
+                if (spotId, nextSpotId) in spotMapping:
+                    spotMapping[(spotId, nextSpotId)] += 1
+                    #print "Mapping inc: (%d,%d)" % (spotId, nextSpotId)
+                else:
+                    spotMapping[(spotId, nextSpotId)] = 1
+                    #print "New mapping: (%d,%d)" % (spotId, nextSpotId)
+        print "Done processing!"
+        return spotMapping
+  
 
     ''' # This version should run when vsApi.getUseractions() gets data from the VikingSpotsApi
     def getDayCheckins(self):
@@ -88,7 +118,7 @@ class WhatsNextApi:
 
 
 
-    ## DAY SCRIPT  ####################################################
+    ## Getting next spot data  ########################################
 
     # This function returns the nth most popular next spots from the
     # nextSpotCount database.
@@ -122,7 +152,7 @@ class WhatsNextApi:
         # TODO clean up
         JSON = "{ "
         JSON += "\"meta\": { \"code\": \"200\" }, "
-        JSON += "\"reponse\": { " \
+        JSON += "\"response\": { " \
                 "\"count\": \"%d\", " % len(topNextSpots)
 
         JSON += "\"spots\": [ "
@@ -140,6 +170,8 @@ class WhatsNextApi:
     ## MISC.  #########################################################
     def getSpotById(self, id):
         return self.vsApi.getSpotById(id)
+
+    # Set the token to be used when calling the VikingSpots API
     def useToken(self, token):
         self.vsApi.token = token
     ###################################################################

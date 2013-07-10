@@ -8,7 +8,10 @@ import DBQuery
 def write( spotMapping ):
 
     DBQuery.openConnection()
+    i = 0
     for tuple in spotMapping:
+        if i % 1000 == 0:
+            print "Writing tuple.. %d" % i
         value=spotMapping[tuple]
 
         SELECT='SELECT count, COUNT( * ) AS  "Exists" FROM nextSpotCount WHERE  spotId = %s AND nextSpotId = %s' % (tuple[0],tuple[1])
@@ -19,7 +22,6 @@ def write( spotMapping ):
             print "Updated existing row (%d,%d)" % (tuple[0], tuple[1])
         else:
             QUERY= "INSERT INTO nextSpotCount VALUES (NULL ,  '%s',  '%s',  '%s');" % (tuple[0],tuple[1],value)
-            print "Inserted new row (%d,%d)" % (tuple[0], tuple[1])
         returnedStuff = DBQuery.writeDB( QUERY )
         #print returnedStuff
 

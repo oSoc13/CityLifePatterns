@@ -23,28 +23,6 @@ lastRun = ""            # End of last run (date)
 endOfCurrentRun = ""
 
 ## Helper functions ###########################
-# Builds a local cache of spot mappings
-def processCheckins(dayCheckins):
-    print "\nProcessing checkins..."
-    spotIds = []
-    nextSpotIds = []
-    spotMapping = {}
-    i = 0   # Used to select checkins after current checkin
-    for checkin in dayCheckins:
-        nextCheckin = api.findNextCheckin(checkin.user_id, dayCheckins[i+1::])
-        if nextCheckin is not None:
-            spotId = checkin.spot_id
-            nextSpotId = nextCheckin.spot_id
-            if (spotId, nextSpotId) in spotMapping:
-                spotMapping[(spotId, nextSpotId)] += 1
-                print "Mapping inc: (%d,%d)" % (spotId, nextSpotId)
-            else:
-                spotMapping[(spotId, nextSpotId)] = 1
-                print "New mapping: (%d,%d)" % (spotId, nextSpotId)
-        i += 1
-    print "Done processing!"
-    return spotMapping
-  
 # Write current time to file 'lastrun'
 def nightScriptStart():
     global lastRun
@@ -72,6 +50,7 @@ def nightScriptStart():
 
 # Write away info about this run if necessary
 def nightScriptEnd():
+    print "\nTerminating..."
     return
 
 ## Main #######################################
@@ -88,7 +67,7 @@ if nrCheckins > 0:
     print "\nGot %d day checkins" % nrCheckins
     print "First checkin:  %s" % dayCheckins[0].created_on
     print "Last checkin: %s" % dayCheckins[nrCheckins-1].created_on
-    spotMapping = processCheckins(dayCheckins)
+    spotMapping = buildSpotMapping(dayCheckins)
     if len(spotMapping) > 0:
         print "\n%d spot mappings found" % len(spotMapping)
         print "\nWriting to DB..."
@@ -100,7 +79,6 @@ else:
     print "\nThere were no checkins today"
 
 nightScriptEnd()
-print "\nTerminating..."
 ###################################################################
 
 
