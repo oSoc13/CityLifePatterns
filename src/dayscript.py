@@ -25,8 +25,13 @@ def printNextSpots(spots):
 ## Main ###########################################################
 
 # Input
-spotId = 180
+spotId = 0
 nrSpots = 10
+if len(sys.argv) > 1:
+    spotId = int(sys.argv[1])
+    print spotId
+else:
+    spotId = 180
 ###
 
 spot = api.getSpotById(spotId)

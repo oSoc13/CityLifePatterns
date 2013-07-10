@@ -137,6 +137,32 @@ class WhatsNextApi:
             topNextSpots.append(row)
         return topNextSpots
 
+    def formJsonSpotsArray(self, nextSpots):
+        JSON = ""
+        JSON += "\"spots\": [ "
+        for (spotId,count) in nextSpots:
+            spotJSON = self.vsApi.getSpotByIdJSON(spotId)
+            if spotJSON is not None:
+                JSON += spotJSON
+                JSON += ", "
+        JSON = JSON[:-2]
+        JSON += "] "
+        return JSON
+
+    def formJsonResponse(self, nextSpots):
+        nrSpots = len(nextSpots)
+        JSON = "{ "
+        JSON += "\"meta\": { \"code\": \"200\" }, "
+        JSON += "\"response\": { "
+        if nrSpots > 1:
+            JSON +="\"count\": \"%d\", " % nrSpots        
+            JSON += self.formJsonSpotsArray(nextSpots)
+        else:
+            JSON +="\"count\": 0 "
+        JSON += "} }"
+        return JSON
+
+
     # Must return string
     def getPopularNextSpotsJSON(self, spotId, nrSpots):
         DBQuery.openConnection();
@@ -145,24 +171,10 @@ class WhatsNextApi:
         returnedResults = DBQuery.queryDB(queryString)
         DBQuery.closeConnection();
 
-        topNextSpots = []
+        nextSpots = []
         for row in returnedResults:
-            topNextSpots.append(row)
-        
-        # TODO clean up
-        JSON = "{ "
-        JSON += "\"meta\": { \"code\": \"200\" }, "
-        JSON += "\"response\": { " \
-                "\"count\": \"%d\", " % len(topNextSpots)
-
-        JSON += "\"spots\": [ "
-        for (spotId,count) in topNextSpots:
-            spotJSON = self.vsApi.getSpotByIdJSON(spotId)
-            JSON += spotJSON
-            JSON += ", "
-        JSON = JSON[:-2]
-        JSON += "] } }"
-        return JSON
+            nextSpots.append(row)
+        return self.formJsonResponse(nextSpots)
     ###################################################################
 
 

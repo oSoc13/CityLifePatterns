@@ -96,8 +96,11 @@ class VikingSpotsApiWrapper:
         )
         resp = requests.get(url, params=params, verify=False)
         jsonData = resp.json()
-        spotJSON = json.dumps(jsonData["response"]) # spotJSON = string
-        return spotJSON
+        if 200 == jsonData["meta"]["code"]:
+            spotJSON = json.dumps(jsonData["response"]) # spotJSON = string
+            return spotJSON
+        else:
+            return None
 
 
 ####################################
