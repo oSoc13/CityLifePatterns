@@ -7,38 +7,12 @@
 import VikingSpotsApiWrapper
 from VikingSpotsApiWrapper import *
 import DBQuery
-import time                
-import datetime             
-import calendar
-
-import os.path
 ###################################
-
-modulesDir = os.path.dirname(os.path.abspath(__file__))
 
 class WhatsNextApi:
     vsApi = VikingSpotsApiWrapper() 
-    lastRun = ""            # End of last run (date)
+    lastRun = ""
     endOfCurrentRun = ""
-
-
-    ## Initialize  ####################################################
-    def __init__(self, baseDir):
-        filepath = os.path.join(baseDir, "lastrun")
-        if os.path.exists(filepath):
-            file = open(filepath)
-            fileContents = file.read()
-            entries = fileContents.split(": ")
-            self.lastRun = entries[1]
-            if (self.lastRun.endswith("\n")):
-                self.lastRun = self.lastRun[:-1]
-            date = datetime.datetime.strptime(self.lastRun, '%Y-%m-%d %H:%M:%S')
-            endDate = date + datetime.timedelta(days=1)
-            self.endOfCurrentRun = endDate.strftime("%Y-%m-%d %H:%M:%S")
-        else:
-            print "First run, will retrieve all checkin data..."
-    ###################################################################
-
 
     ## NIGHT SCRIPT  ##################################################
     ##################### Private functions ###########################
@@ -115,22 +89,50 @@ class WhatsNextApi:
 
 
     ## DAY SCRIPT  ####################################################
+
     # This function returns the nth most popular next spots from the
     # nextSpotCount database.
     # QUERY
     #   for spotId, return n spots with highest count
-    def getTopNextSpots(self, spotId, nrSpots):
+    # Called by API to return JSON data
+    def getPopularNextSpots(self, spotId, nrSpots):
         DBQuery.openConnection();
         queryString = "SELECT nextSpotId, count FROM nextSpotCount "\
                       "WHERE spotId = %d ORDER BY count DESC LIMIT 0, %d" % (spotId, nrSpots)
         returnedResults = DBQuery.queryDB(queryString)
         DBQuery.closeConnection();
 
-
         topNextSpots = []
         for row in returnedResults:
             topNextSpots.append(row)
         return topNextSpots
+
+    # Must return string
+    def getPopularNextSpotsJSON(self, spotId, nrSpots):
+        DBQuery.openConnection();
+        queryString = "SELECT nextSpotId, count FROM nextSpotCount "\
+                      "WHERE spotId = %d ORDER BY count DESC LIMIT 0, %d" % (spotId, nrSpots)
+        returnedResults = DBQuery.queryDB(queryString)
+        DBQuery.closeConnection();
+
+        topNextSpots = []
+        for row in returnedResults:
+            topNextSpots.append(row)
+        
+        # TODO clean up
+        JSON = "{ "
+        JSON += "\"meta\": { \"code\": \"200\" }, "
+        JSON += "\"reponse\": { " \
+                "\"count\": \"%d\", " % len(topNextSpots)
+
+        JSON += "\"spots\": [ "
+        for (spotId,count) in topNextSpots:
+            spotJSON = self.vsApi.getSpotByIdJSON(spotId)
+            JSON += spotJSON
+            JSON += ", "
+        JSON = JSON[:-2]
+        JSON += "] } }"
+        return JSON
     ###################################################################
 
 
@@ -138,4 +140,6 @@ class WhatsNextApi:
     ## MISC.  #########################################################
     def getSpotById(self, id):
         return self.vsApi.getSpotById(id)
+    def useToken(self, token):
+        self.vsApi.token = token
     ###################################################################

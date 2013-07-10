@@ -9,7 +9,13 @@ from vikings.views import *
 
 urlpatterns = patterns('',
 
-    url(r'^api/checkins/day/$', showDayCheckins)
+    # \d+ : any digit,
+    # ()  : make variable available in view
+
+    #url(r'^api/checkins/day/$', showDayCheckins),
+
+    # e.g. ../api/239zajze23/whatsnext/180/
+    url(r'^api/(?P<userToken>[a-zA-Z\d+]*)/whatsnext/(?P<spotId>\d+)/$', whatsNext)         
 
     # Example:
     # (r'^vikings/', include('vikings.foo.urls')),

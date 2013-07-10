@@ -82,11 +82,22 @@ class VikingSpotsApiWrapper:
         resp = requests.get(url, params=params, verify=False)
         jsonData = resp.json()
         if 200 == jsonData["meta"]["code"]:
-            spotJson = jsonData["response"]
+            spotJson = jsonData["response"] # spotJson = dict
             return Spot(spotJson)
         else:
             # print "Error: %d code " % jsonData["meta"]["code"]
             return None
+
+    def getSpotByIdJSON(self, id):
+        url = self.urls["spotByIdRequest"]
+        params = dict(
+                bearer_token = self.token,
+                spot_id = id
+        )
+        resp = requests.get(url, params=params, verify=False)
+        jsonData = resp.json()
+        spotJSON = json.dumps(jsonData["response"]) # spotJSON = string
+        return spotJSON
 
 
 ####################################
@@ -127,12 +138,14 @@ class Spot():
     ll = [0.0,0.0]         # lat,long
     name = ""
     private = False
+    json = {}
 
     def __init__(self, json):
         self.id = json["id"]
         self.ll = [json["latitude"], json["longitude"]]
         self.name = json["name"]
         self.private = json["private"]  
+        self.json = json
 
     def toStr(self):
         print "name: %d" % self.name
