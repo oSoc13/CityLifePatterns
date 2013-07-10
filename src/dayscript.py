@@ -7,8 +7,7 @@
 #
 ###################################
 import sys
-sys.path.insert(0, './core')    # Specify additional directory to load python modules from
-sys.path.insert(0, './modules')   
+sys.path.insert(0, './modules')    # Specify additional directory to load python modules from
 import WhatsNextApi
 from WhatsNextApi import *
 ###################################

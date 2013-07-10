@@ -16,6 +16,7 @@ def closeConnection():
     con.close()
 
 def queryDB( str ):
+    global con
     try:
         cur = con.cursor()
         cur.execute(str)

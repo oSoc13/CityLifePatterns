@@ -6,6 +6,7 @@
 ###################################
 import VikingSpotsApiWrapper
 from VikingSpotsApiWrapper import *
+import DBQuery
 import time                
 import datetime             
 import calendar
@@ -114,7 +115,22 @@ class WhatsNextApi:
 
 
     ## DAY SCRIPT  ####################################################
+    # This function returns the nth most popular next spots from the
+    # nextSpotCount database.
+    # QUERY
+    #   for spotId, return n spots with highest count
+    def getTopNextSpots(self, spotId, nrSpots):
+        DBQuery.openConnection();
+        queryString = "SELECT nextSpotId, count FROM nextSpotCount "\
+                      "WHERE spotId = %d ORDER BY count DESC LIMIT 0, %d" % (spotId, nrSpots)
+        returnedResults = DBQuery.queryDB(queryString)
+        DBQuery.closeConnection();
 
+
+        topNextSpots = []
+        for row in returnedResults:
+            topNextSpots.append(row)
+        return topNextSpots
     ###################################################################
 
 
