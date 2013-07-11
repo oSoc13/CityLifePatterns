@@ -80,8 +80,8 @@ class WhatsNextApi:
         for checkin in checkins:
             if i % 1000 == 0:
                 print "Processing checkin %d..." % i
-            i += 1
             nextCheckin = self.findNextCheckin(checkin.user_id, checkins[i+1:])
+            i += 1
             if nextCheckin is not None and not checkin.spot_id == nextCheckin.spot_id:
                 spotId = checkin.spot_id
                 nextSpotId = nextCheckin.spot_id
@@ -119,24 +119,6 @@ class WhatsNextApi:
 
 
     ## Getting next spot data  ########################################
-
-    # This function returns the nth most popular next spots from the
-    # nextSpotCount database.
-    # QUERY
-    #   for spotId, return n spots with highest count
-    # Called by API to return JSON data
-    def getPopularNextSpots(self, spotId, nrSpots):
-        DBQuery.openConnection();
-        queryString = "SELECT nextSpotId, count FROM nextSpotCount "\
-                      "WHERE spotId = %d ORDER BY count DESC LIMIT 0, %d" % (spotId, nrSpots)
-        returnedResults = DBQuery.queryDB(queryString)
-        DBQuery.closeConnection();
-
-        topNextSpots = []
-        for row in returnedResults:
-            topNextSpots.append(row)
-        return topNextSpots
-
     def formJsonSpotsArray(self, nextSpots):
         JSON = ""
         JSON += "\"spots\": [ "
@@ -163,6 +145,24 @@ class WhatsNextApi:
         return JSON
 
 
+
+    # This function returns the nth most popular next spots from the
+    # nextSpotCount database.
+    # QUERY
+    #   for spotId, return n spots with highest count
+    # Called by API to return JSON data
+    def getPopularNextSpots(self, spotId, nrSpots):
+        DBQuery.openConnection();
+        queryString = "SELECT nextSpotId, count FROM nextSpotCount "\
+                      "WHERE spotId = %d ORDER BY count DESC LIMIT 0, %d" % (spotId, nrSpots)
+        returnedResults = DBQuery.queryDB(queryString)
+        DBQuery.closeConnection();
+
+        topNextSpots = []
+        for row in returnedResults:
+            topNextSpots.append(row)
+        return topNextSpots
+
     # Must return string
     def getPopularNextSpotsJSON(self, spotId, nrSpots):
         DBQuery.openConnection();
@@ -182,6 +182,9 @@ class WhatsNextApi:
     ## MISC.  #########################################################
     def getSpotById(self, id):
         return self.vsApi.getSpotById(id)
+    
+    def getSpotCreationDate(self, spotId):
+        return self.vsApi.getSpotCreationDate(spotId)
 
     # Set the token to be used when calling the VikingSpots API
     def useToken(self, token):

@@ -28,6 +28,8 @@ class VikingSpotsApiWrapper:
         fileContents = file.read()
         entries = fileContents.split("=")
         self.token = entries[1]
+        if (self.token.endswith("\n")):
+            self.token = self.token[:-2]
 
         # Read urls from file
         # file = open("urls") Doesn't work with Django, use os.path
@@ -88,6 +90,7 @@ class VikingSpotsApiWrapper:
             # print "Error: %d code " % jsonData["meta"]["code"]
             return None
 
+
     def getSpotByIdJSON(self, id):
         url = self.urls["spotByIdRequest"]
         params = dict(
@@ -101,6 +104,21 @@ class VikingSpotsApiWrapper:
             return spotJSON
         else:
             return None
+
+
+    def getSpotCreationDate(self, spotId):
+        url = self.urls["importSpotByIdRequest"]
+        params = dict(
+                bearer_token = self.token,
+                spot_id = spotId
+        )
+        resp = requests.get(url, params=params, verify=False)
+        jsonData = resp.json()
+        if 200 == jsonData["meta"]["code"]:
+            return jsonData["response"]["created_on"]
+        else:
+            print jsonData["meta"]["code"]
+
 
 
 ####################################
@@ -142,6 +160,7 @@ class Spot():
     name = ""
     private = False
     json = {}
+    creationDate = ""
 
     def __init__(self, json):
         self.id = json["id"]
@@ -155,3 +174,4 @@ class Spot():
         print "id: %d" % self.id
         print "ll: %f,%f" % (self.ll[0], self.ll[1])
         print "private: %s" % self.private
+
