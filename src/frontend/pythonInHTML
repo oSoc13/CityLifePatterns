@@ -1,8 +1,14 @@
+Syntax:
+http://www.digi.com/wiki/developer/index.php/Python_inside_HTML#Inside_HTML
+
+Examples
+=======
+
+<%= var %>                      = shortcut for <% print var %>
+
 {{ person_name }}               = variable
 
 {% if ordered_warranty %}       = template tag
-    True:   shows everything between {% if ordered_warranty %} and {% else %}
-    False:  shows everything between {% else %} and {% endif %}.
 {% for item in itemlist %}       
 
 {{ ship_date|date:"F j, Y" }}   = filter

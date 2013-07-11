@@ -1,8 +1,7 @@
 from django.conf.urls.defaults import *
 
 # View imports
-from vikings.views import hello
-from vikings.views import current_datetime
+from vikings.views import *
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -10,8 +9,7 @@ from vikings.views import current_datetime
 
 urlpatterns = patterns('',
 
-    url(r'^hello/$', hello),
-    url(r'^time/$', current_datetime)
+    url(r'^api/checkins/day/$', showDayCheckins)
 
     # Example:
     # (r'^vikings/', include('vikings.foo.urls')),

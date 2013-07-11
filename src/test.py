@@ -8,8 +8,9 @@
 ###################################
 import WhatsNextApi
 from WhatsNextApi import *
+import VikingSpotsApiWrapper
+from VikingSpotsApiWrapper import *
 ###################################
-
 
 
 
@@ -19,12 +20,20 @@ from WhatsNextApi import *
 print "Testing..."
 
 api = WhatsNextApi()
-checkins = api.getDayCheckins()
-print len(checkins)
+#api.writeLastRun()
+dayCheckins = api.getDayCheckins()
+print "nr day checkins %d" % len(dayCheckins)
 
-spotIds = list()
-for action in checkins:
-    spotIds.append(action.spot_id)
+print "printing..."
+#for checkin in dayCheckins:
+    #checkin.toStr()
+    #print checkin.created_on
+
+'''
+api = VikingSpotsApiWrapper()
+checkins = api.getUserActions(0,0)
+'''
+
 
 
 

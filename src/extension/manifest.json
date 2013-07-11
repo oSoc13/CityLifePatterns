@@ -1,0 +1,30 @@
+{
+    "name": "CityLife WhatsNext Extension",
+    "version": "0.0.5",
+    "manifest_version": 2,
+    "description": "This extension was created with the awesome extensionizr.io",
+    "homepage_url": "http://extensionizr.com",
+    "background": {
+        "page": "background.html",
+        "persistent": true
+    },
+    "permissions": [ "webRequest", "tabs", "webRequestBlocking", "https://*.vikingspots.com/*", "https://web.citylifeapp.com/*", "<all_urls>"],
+    "content_scripts": [
+        {
+        "matches": [
+            "https://web.citylifeapp.com/*"
+        ],
+        "css": [
+            "inject.css"
+        ]
+    },
+    {
+        "matches": [
+            "https://web.citylifeapp.com/*"
+        ],
+        "js": [
+            "jquery.min.js", "inject.js"
+        ]
+    }
+  ]
+}

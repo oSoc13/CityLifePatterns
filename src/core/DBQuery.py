@@ -4,6 +4,8 @@ import MySQLdb as mdb
 import sys
 from dbconfig import *
 
+con = object()
+
 def queryDB( str ):
     try:
         con = mdb.connect(host, user, passw, db)
