@@ -1,4 +1,5 @@
-#/bin/bash
+#!/bin/bash
+#This script clears out the parts that aren't returned by the CityLife API and converts the names of some atributes to those present by the API
 i=0
 cat checkInActions.list | while read line
 

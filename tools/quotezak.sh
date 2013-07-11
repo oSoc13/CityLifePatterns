@@ -1,4 +1,6 @@
-#/bin/bash
+#!/bin/bash
+#This scripts makes sure the json becomes valid by adding " before and after the atributes
+
 i=0
 cat checkInActions.json | while read line
 

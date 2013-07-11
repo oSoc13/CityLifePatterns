@@ -1,4 +1,6 @@
-#/bin/bash
+#!/bin/bash
+#This script converts the UserActions.list file to a CSV file.
+#We didn't use it in the end because it would have been slower and to cumbersome
 i=0
 cat UserActions.list | while read line
 
