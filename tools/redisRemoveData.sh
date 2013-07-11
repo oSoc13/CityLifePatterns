@@ -3,7 +3,7 @@ i=0
 cat UserActions.list | while read line
 
 do
-   # for each UserAction, remove the variable name and change to ','
+   # do something with $line here
    i=$((i+1))
 
    cleanLine=$(sed -e 's/binary //' <<<$line)
@@ -20,7 +20,7 @@ do
    cleanLine=$(sed -e 's/ id/,/' <<<$cleanLine)
    cleanLine=$(sed -e 's/ extra_spot_id/,/' <<<$cleanLine)
 
-   echo $i  #print the counter
-   echo $cleanLine >> UserActions.csv #add the "clean" csv style line to file
+   echo $i
+   echo $cleanLine >> UserActions.svg
 done
 #echo $keyContent > redisUserActionKeyValues.list
