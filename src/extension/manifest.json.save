@@ -1,0 +1,9 @@
+{
+    "name": "CityLife WhatsNext",
+    "version": "1",
+    "description": "Events! Gotta catch em all!",
+    "content_scripts" : [{
+        "matches" : [ "web.citylifeapp.com/*"],
+        "js" : ["myScript.js"]
+    }]
+}
