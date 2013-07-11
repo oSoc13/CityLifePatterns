@@ -16,7 +16,7 @@ The API can grab the x highest counts for a checkin of choise, or it can use the
 Future development will enable the API to use weights as well as counts. The weight algorithmn needs to be tweaked in order to make it really relevant.
 This however will not be handled during oSoc13 due to a lack of time.
 
-#Frontend
+##Frontend
 Though the primary goal was the backend, we took the time actually do something with it.
 in src/extension you will find an unpacked chrome extension that will enable you to add our feature to the CityLife WebApp that can be found at:
 https://web.citylifeapp.com
