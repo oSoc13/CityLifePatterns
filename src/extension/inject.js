@@ -65,7 +65,7 @@ function whatsUpNext(spotID){
     
 }
 function requestJson(token, spotID){
-    var whatsNextUrl="http://127.0.0.1:8000/api/"+token+"/whatsnext/"+spotID+"/";
+    var whatsNextUrl="http://osoc.webvi.be/api/"+token+"/whatsnext/"+spotID+"/";
     $.ajax({
         dataType: "json",
         url: whatsNextUrl,
