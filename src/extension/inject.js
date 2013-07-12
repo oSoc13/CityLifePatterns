@@ -78,7 +78,7 @@ function requestJson(token, spotID){
         for(var i=0;i<theSpots.length;i++){
             html += "<div class=\"listitem more\">";
             html += "<a class=\"morebutton color-39c3ae\" data-href=\"params%5Bchannel%5D=shoppingplaces&amp;type=list&amp;channel=builtin&amp;view=Discover\" onclick=\"app.navigate('params%5Bchannel%5D=shoppingplaces&amp;type=list&amp;channel=builtin&amp;view=Discover'); return false;\">";
-            html += "<img src=\"http://vdnkr.be/icon-next.png\" class=\"icon\" alt=\"shopping\"></a><a class=\"title\" data-href=\"params%5Bid%5D="+theSpots[i].id+"&amp;type=spotdetail&amp;channel=spots&amp;view=SpotDetail\" onclick=\"app.navigate('params%5Bid%5D="+theSpots[i].id+"&amp;type=spotdetail&amp;channel=spots&amp;view=SpotDetail'); return false;\">";
+            html += "<img src=\"http://vdnkr.be/icon-next-white.png\" class=\"icon\" alt=\"shopping\"></a><a class=\"title\" data-href=\"params%5Bid%5D="+theSpots[i].id+"&amp;type=spotdetail&amp;channel=spots&amp;view=SpotDetail\" onclick=\"app.navigate('params%5Bid%5D="+theSpots[i].id+"&amp;type=spotdetail&amp;channel=spots&amp;view=SpotDetail'); return false;\">";
             html += "<div class=\"vertically-centered has-description\">";
             html += "<h1>"+theSpots[i].name+"</h1>";
             html += "<p>"+theSpots[i].description+"</p>";
