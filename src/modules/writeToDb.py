@@ -1,4 +1,3 @@
-
 #!/user/bin/python
 import sys
 sys.path.insert(0, 'core')
@@ -6,12 +5,12 @@ sys.path.insert(0, 'core')
 import DBQuery
 
 def write( spotMapping ):
-
     DBQuery.openConnection()
     i = 0
     for tuple in spotMapping:
         if i % 1000 == 0:
             print "Writing tuple.. %d" % i
+        i += 1
         value=spotMapping[tuple]
 
         SELECT='SELECT count, COUNT( * ) AS  "Exists" FROM nextSpotCount WHERE  spotId = %s AND nextSpotId = %s' % (tuple[0],tuple[1])
@@ -28,3 +27,36 @@ def write( spotMapping ):
         #print "spotID: %s | nextID: %s | count: %s " % (tuple[0], tuple[1], value)
     DBQuery.closeConnection()
     #print "ending..."
+
+
+def writeToDbNew(rows):
+    DBQuery.openConnection()
+
+    for (spotId, nextSpotId) in rows:
+        key = (spotId, nextSpotId)
+        values = rows[key]
+        dayCount = values['dayCount']
+        spotCreationDate = values['spotCreationDate']
+        lastOccurrence = values['lastOccurrence']
+        MspotAge = values['MspotAge']
+        weightedPopularity = values['weightedPopularity']
+
+        SELECT = 'SELECT totalCount, COUNT(*) AS "Exists" ' \
+                 'FROM whatsnext WHERE spotId = %s AND nextSpotId = %s' % (spotId, nextSpotId)
+        EXISTArray = DBQuery.queryDBSingleResponse(SELECT)
+        if EXISTArray[1] == 1:
+            totalCount = EXISTArray[0] + dayCount
+            QUERY = "UPDATE whatsnext " \
+                    "SET totalCount = '%s' AND spotCreationDate = '%s' AND lastOccurrence = '%s' " \
+                    "AND MspotAge = '%s' AND weightedPopularity = '%s'" \
+                    "WHERE spotId=%s AND nextSpotId=%s;" % \
+                        (totalCount, spotCreationDate, lastOccurrence, 
+                         MspotAge, weightedPopularity,
+                         spotId, nextSpotId)
+        else:
+            QUERY = "INSERT INTO whatsnext " \
+                    "VALUES (NULL,  '%s',  '%s', '%s',  '%s', '%s', '%s', '%s');" % \
+                        (spotId, nextSpotId, dayCount, spotCreationDate, lastOccurrence,
+                         MspotAge, weightedPopularity)
+        DBQuery.writeDB(QUERY)
+    DBQuery.closeConnection()

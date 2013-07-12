@@ -88,6 +88,7 @@ def calculateNewSpotAgeMultiplier(parameters, oldestAge):
     return multiplier
     
 
+# Wouter: update this and it *should* work... I can check more closely on Sunday
 def calculateNewTimeSpentMultiplier(parameters):
     return 1
 
@@ -121,7 +122,7 @@ def calculateNewWeightedPopularity(multipliers, dayCount):
                        weights['timeSpent'] * multipliers['MtimeSpent']
 
     dayPopularity = dayCount * masterMultiplier
-    oldPopularity = 0
+    oldPopularity = 0  # TODO Should be read from DB
     alpha = 0.7
     beta = 0.3
     newPopularity = (alpha * oldPopularity) + (beta * dayPopularity)

@@ -15,12 +15,14 @@ from WhatsNextApi import *
 api = WhatsNextApi()
 
 def printNextSpots(spots):
+    output = "{0:50} {1:10} {2:10}"
+    print output.format("\nSPOT NAME", "         ID", "      COUNT\n")
     for (spotId,count) in topNextSpots:
         spot = api.getSpotById(spotId)
         if not spot == None:
-            print "%s (count=%d)" % (spot.name, count)
+            print output.format(spot.name, spot.id, count)
         else:
-            print "No access to this spot (id=%d) (count=%d)." % (spotId,count)
+            print output.format("(private)", spotId, count)
 
 ## Main ###########################################################
 
@@ -29,7 +31,6 @@ spotId = 0
 nrSpots = 10
 if len(sys.argv) > 1:
     spotId = int(sys.argv[1])
-    print spotId
 else:
     spotId = 180
 ###
@@ -43,7 +44,7 @@ else:
     nrSpotsFound = len(topNextSpots)
 
     if nrSpotsFound > 0:
-        print "\n%d spots found." % nrSpotsFound
+        print "%d spots found." % nrSpotsFound
         printNextSpots(topNextSpots)
     else:
         print "\nNo popular next spots found."

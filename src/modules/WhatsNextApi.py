@@ -13,6 +13,7 @@ class WhatsNextApi:
     vsApi = VikingSpotsApiWrapper() 
     lastRun = ""
     endOfCurrentRun = ""
+    creationDateCalculation = 0
 
     ## Building the database  #########################################
     def retrieveCheckinsFromActions(self, userActions):
@@ -37,25 +38,28 @@ class WhatsNextApi:
                 return True
         return False
 
-    def omitCheckinsBeforeLastRun(self, checkins):
-        checkins = [checkin for checkin in checkins if self.lastRun < checkin.created_on]
+    def omitCheckinsBeforeDate(self, checkins, date):
+        checkins = [checkin for checkin in checkins if date < checkin.created_on]
         return checkins
 
-    def omitCheckinsAfterEndOfCurrentRun(self, checkins):
-        checkins = [checkin for checkin in checkins if checkin.created_on < self.endOfCurrentRun]
+    def omitCheckinsAfterDate(self, checkins, date):
+        checkins = [checkin for checkin in checkins if checkin.created_on < date]
         return checkins
 
     ######
+
+    def getAllCheckinsBetweenDates(self, date1, date2):
+        checkins = self.vsApi.getUserActions(0,0)
+        checkins = self.omitCheckinsBeforeDate(checkins, date1)
+        checkins = self.omitCheckinsAfterDate(checkins, date2)
+        return checkins
 
     # This function retrieves the checkins of the previous day, most recent last
     # 'Today' is determined by lastRun and endOfCurrentRun(=24 hours ahead)
     # This allows us to simulate the adding of new checkins per day
     # Note: SQL Dump has all checkins before 2012-03-12 00:00:00
     def getDayCheckins(self):
-        allCheckins = self.vsApi.getUserActions(0,0)
-        allCheckins = self.omitCheckinsBeforeLastRun(allCheckins)
-        dayCheckins = self.omitCheckinsAfterEndOfCurrentRun(allCheckins)
-        return dayCheckins
+        return getAllCheckinsBetweenDates(self.lastRun, self.endOfCurrentRun)
 
     def getAllCheckinsBeforeDate(self, date):
         allCheckins = self.vsApi.getUserActions(0,0)
@@ -184,6 +188,7 @@ class WhatsNextApi:
         return self.vsApi.getSpotById(id)
     
     def getSpotCreationDate(self, spotId):
+        self.creationDateCalculation += 1
         return self.vsApi.getSpotCreationDate(spotId)
 
     # Set the token to be used when calling the VikingSpots API
