@@ -37,6 +37,7 @@ if nrCheckins > 0:
     print "First checkin: %s" % checkins[0].created_on
     print "Last checkin: %s" % checkins[nrCheckins-1].created_on
 
+    '''
     spotMapping = api.buildSpotMapping(checkins)
     if len(spotMapping) > 0:
         print "\n%d spot mappings found" % len(spotMapping)
@@ -45,6 +46,18 @@ if nrCheckins > 0:
         print "Done writing to DB!" 
     else:
         print "\nNo spot mappings found today."
+    '''
+
+    spotTimeMapping = api.buildSpotTimeMapping(checkins)
+    if len(spotTimeMapping) > 0:
+        print "\n%d spot mappings found" % len(spotTimeMapping)
+        print "\nWriting to DB..."
+        #writeToDb.write(spotTimeMapping)
+        print "Done writing to DB!"
+    else:
+        print "\nNo spot mappings found today."
+
+
 else:
     print "\nThere were no checkins today"
 

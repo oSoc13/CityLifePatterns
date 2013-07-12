@@ -7,6 +7,9 @@
 import VikingSpotsApiWrapper
 from VikingSpotsApiWrapper import *
 import DBQuery
+import datetime
+import math
+from datetime import datetime
 ###################################
 
 class WhatsNextApi:
@@ -93,6 +96,63 @@ class WhatsNextApi:
                     #print "New mapping: (%d,%d)" % (spotId, nextSpotId)
         print "Done processing!"
         return spotMapping
+
+    # Builds a spot mapping from the given checkins based on occurrence count and a weight calculated by the average time spent and the spread
+    def buildSpotTimeMapping(self, checkins):
+        print "\nProcessing checkins..."
+        spotIds = []
+        nextSpotIds = []
+        spotMapping = {}
+        i = 0   # Used to select checkins after current checkin
+        for checkin in checkins:
+            if i % 1000 == 0:
+                print "Processing checkin %d..." % i
+            i += 1
+            nextCheckin = self.findNextCheckin(checkin.user_id, checkins[i+1:])
+            if nextCheckin is not None and not checkin.spot_id == nextCheckin.spot_id:
+                spotId = checkin.spot_id
+                nextSpotId = nextCheckin.spot_id
+                timeSpent = self.calculateTimeSpent(checkin.created_on, nextCheckin.created_on)
+                
+                if (spotId, nextSpotId) in spotMapping:
+                    storedCount = spotMapping[(spotId, nextSpotId)][0]
+                    storedAverageVariance = spotMapping[(spotId, nextSpotId)][1]
+                    storedAverageTimeSpent = spotMapping[(spotId, nextSpotId)][2]
+                    oldMultiplier = spotMapping[(spotId, nextSpotId)][3]
+                
+                    count = storedCount + 1
+                    averageTimeSpent = int(float(storedAverageTimeSpent * storedCount) + timeSpent) / count
+                    sumOfSquares = (storedAverageVariance*(storedCount-1)+(storedCount*storedAverageTimeSpent*storedAverageTimeSpent))+(timeSpent*timeSpent)
+                    variance = int(float( sumOfSquares / (storedCount) ) - float( float(count/storedCount) * averageTimeSpent * averageTimeSpent ))
+                    
+                    if(storedAverageVariance != 0 and averageTimeSpent != 0):
+                        thisMultiplier = float( 2 * math.exp( - float(float(timeSpent - averageTimeSpent)**2 ) / ( 2 * storedAverageVariance ) ) )
+                    else:
+                        thisMultiplier = 1
+                    
+                    timeMultiplier = float(float(float(oldMultiplier*storedCount) + float(thisMultiplier)*2)/(count+1))
+
+                    
+                    spotMapping[(spotId, nextSpotId)] = [count, variance, averageTimeSpent, timeMultiplier]
+                    #print "Mapping inc: ({0:7},{1:7}) | {2:7} {3:7} {4:7} | {5:7}" .format(spotId, nextSpotId, count, int(math.sqrt(variance)), averageTimeSpent, timeSpent)
+                    print "{0:7},{1:7},{2:7},{3:7},{4:7},{5:7},{6:7},{7:7}" .format(spotId, nextSpotId, count, int(math.sqrt(variance)), averageTimeSpent, timeSpent, thisMultiplier, timeMultiplier)
+                else:
+                    count = 1
+                    variance = 0
+                    averageTimeSpent = timeSpent
+                    timeMultiplier = 1
+                    spotMapping[(spotId, nextSpotId)] = [count, variance, averageTimeSpent, timeMultiplier]
+                    #print "New Mapping: ({0:7},{1:7}) | {2:7} {3:7} {4:7}" .format(spotId, nextSpotId, count, int(math.sqrt(variance)), averageTimeSpent)
+        print "Done processing!"
+        return spotMapping
+
+    # Returns timespent in minutes
+    def calculateTimeSpent(self, checkinTime, nextCheckintime):
+        if (nextCheckintime < checkinTime):
+            return 0
+        d1 = datetime.strptime(checkinTime, '%Y-%m-%d %H:%M:%S')
+        d2 = datetime.strptime(nextCheckintime, '%Y-%m-%d %H:%M:%S')
+        return abs((d2 - d1).seconds//60)
   
 
     ''' # This version should run when vsApi.getUseractions() gets data from the VikingSpotsApi
