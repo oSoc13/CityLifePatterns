@@ -24,7 +24,7 @@ $(window).bind('hashchange', function (data) {
         setTimeout(function () {
             //Don't add the button if the last button already is the nextSpot button (happens when you visit the same spot multiple times)
             if (!$(".spotdetail .contents ul.list").children().last().hasClass("nextSpot")) {
-                $(".spotdetail .contents ul.list").append("<li class=\"listitem nextSpot\"> <a class=\"title\" data-href=\"type=list&amp;login_required=false&amp;spotID=" + spotID + "&amp;channel=spots&amp;view=NextSpots\" onclick=\"app.navigate('type=list&amp;login_required=false&amp;spotID=" + spotID + "&amp;channel=spots&amp;view=NextSpots'); return false;\"> <span class=\"icon\"> <img src=\"http://vdnkr.be/icon-next.png\" alt=\"nextUp\"> </span> <div class=\"vertically-centered has-description\"> <h1>What's up next?</h1> <p>Find out what to do next!</p> </div> </a> </li>");
+                $(".spotdetail .contents ul.list").append("<li class=\"listitem nextSpot\"> <a class=\"title\" data-href=\"type=list&amp;login_required=false&amp;spotID=" + spotID + "&amp;channel=spots&amp;view=NextSpots\" onclick=\"app.navigate('type=list&amp;login_required=false&amp;spotID=" + spotID + "&amp;channel=spots&amp;view=NextSpots'); return false;\"> <span class=\"icon\"> <img src=\"http://vdnkr.be/icon-next-white.png\" alt=\"nextUp\"> </span> <div class=\"vertically-centered has-description\"> <h1>What's up next?</h1> <p>Find out what to do next!</p> </div> </a> </li>");
             }
         }, 1000);
     }
