@@ -17,6 +17,7 @@ import time
 import math      
 import datetime
 import calendar
+import DBQuery
 ###################################
 
 api = WhatsNextApi()
@@ -34,6 +35,7 @@ weights = {'spotAge': 1.0, 'timeSpent': 0.0}     # Sum must be 1
 # For each checkin, get the next checkin by same user
 # Checkins are already sorted by date (most recent last)
 def findNextCheckin(userId, checkins, index):
+    checkins = checkins[index+1:]
     return next((nextCheckin for nextCheckin in checkins if userId == nextCheckin.user_id), None)
 
 
@@ -45,7 +47,61 @@ def calculateSpotAge(checkinDate, spotCreationDate):
     d2 = datetime.datetime.strptime(checkinDate, '%Y-%m-%d %H:%M:%S')
     return abs((d2 - d1).days)
 
+def readVariablesFromDB(key):
+    query = "SELECT totalCount, variance, averageTimeSpent, MtimeSpent FROM whatsnext " \
+            "WHERE spotId = '%s' AND nextSpotId = '%s';" % (key[0], key[1])
+    results = DBQuery.queryDB(query)
+    print results
+    if len(results) > 0:
+        row = results[0]
+        variables = {'totalCount': int(row[0]), 'storedAverageVariance': float(row[1]),
+                'storedAverageTimeSpent': float(row[2]), 'oldMultiplier': float(row[3])}
+        return variables
+    else:
+        return {'totalCount': 1, 'storedAverageVariance': 0.0,
+                'storedAverageTimeSpent': 0.0, 'oldMultiplier': 1}
 
+
+def doTimeSpentCalculations(key, parameters, timeSpent):
+    variables = readVariablesFromDB(key)
+    totalCount = variables['totalCount']
+    storedAverageVariance = variables['storedAverageVariance']
+    storedAverageTimeSpent = variables['storedAverageTimeSpent']
+    oldMultiplier = variables['oldMultiplier']
+    thisMultiplier = 1
+
+    if storedAverageTimeSpent == 0.0:
+        print timeSpent
+        storedAverageTimeSpent = timeSpent
+
+    newTotalCount = totalCount + 1
+    averageTimeSpent = int(float(storedAverageTimeSpent * totalCount) + timeSpent) / newTotalCount
+    sumOfSquares = (storedAverageVariance*(totalCount-1) +
+                        (totalCount*storedAverageTimeSpent**2)) + (timeSpent**2)
+    variance = int(float( sumOfSquares / (totalCount) ) - float( float(newTotalCount/totalCount) * averageTimeSpent **2))
+ 
+                       
+    if (storedAverageVariance != 0 and averageTimeSpent != 0):
+        thisMultiplier = float( 2 * math.exp( - float(float(timeSpent - averageTimeSpent)**2 ) / 
+                    ( 2 * storedAverageVariance ) ) )
+    
+    timeMultiplier = float(float(float(oldMultiplier*totalCount) + 
+                     float(thisMultiplier)*2)/(newTotalCount+1))                    
+
+    print "%f %f %d %f" % (averageTimeSpent, sumOfSquares, variance, timeMultiplier)
+
+    parameters['variance'] = variance
+    parameters['averageTimeSpent'] = averageTimeSpent
+    parameters['MtimeSpent'] = timeMultiplier
+    return parameters
+
+
+def calculateTimeSpent(checkinTime, nextCheckintime):
+    if (nextCheckintime < checkinTime):
+        return 0
+    d1 = datetime.datetime.strptime(checkinTime, '%Y-%m-%d %H:%M:%S')
+    d2 = datetime.datetime.strptime(nextCheckintime, '%Y-%m-%d %H:%M:%S')
+    return abs((d2 - d1).seconds//60)
 
 # Multiplier and parameter calculations 
 ##############################################################
@@ -53,6 +109,8 @@ def calculateParameters():
     global now
     parameters = {}     # (spotId,nextSpotId) | dayCount | spotCreationDate| lastOccurrence | spotAge
     i = 0               # Used to select checkins after current checkin
+
+    DBQuery.openConnection();
     for checkin in checkins:
         nextCheckin = findNextCheckin(checkin.user_id, checkins, i)
         i += 1
@@ -64,27 +122,9 @@ def calculateParameters():
             timeSpent = calculateTimeSpent(checkin.created_on, nextCheckin.created_on)
             # Save the parameters
             if key in parameters:
+                parameters[key] = doTimeSpentCalculations(key, parameters[key], timeSpent)
                 parameters[key]['dayCount'] += 1
                 parameters[key]['lastOccurrence'] = nextCheckin.created_on
-                totalCount = 5 #TODO: GET THIS VAR FROM DB
-                storedAverageVariance = 1 #TODO: GET THIS VAR FROM DB
-                storedAverageTimeSpent = 60 #TODO: GET THIS VAR FROM DB
-                oldMultiplier = 2 #TODO: GET THIS VAR FROM DB
-                
-                newTotalCount = totalCount + 1
-                averageTimeSpent = int(float(storedAverageTimeSpent * totalCount) + timeSpent) / newTotalCount
-                sumOfSquares = (storedAverageVariance*(totalCount-1)+(totalCount*storedAverageTimeSpent**2))+(timeSpent**2)
-                variance = int(float( sumOfSquares / (totalCount) ) - float( float(newTotalCount/totalCount) * averageTimeSpent **2))
-                
-                if(storedAverageVariance != 0 and averageTimeSpent != 0):
-                    thisMultiplier = float( 2 * math.exp( - float(float(timeSpent - averageTimeSpent)**2 ) / ( 2 * storedAverageVariance ) ) )
-                else:
-                    thisMultiplier = 1
-                
-                timeMultiplier = float(float(float(oldMultiplier*totalCount) + float(thisMultiplier)*2)/(newTotalCount+1))                    
-                parameters[key]["variance"] = variance
-                parameters[key]["averageTimeSpent"] = averageTimeSpent
-                parameters[key]["timeSpentMultiplier"] = timeMultiplier
             else:
                 if nextSpotId not in spotCreationDates:
                     spotCreationDates[nextSpotId] = str(api.getSpotCreationDate(spotId))
@@ -93,18 +133,12 @@ def calculateParameters():
                                     'spotCreationDate': spotCreationDates[nextSpotId],
                                     'lastOccurrence': nextCheckin.created_on, 
                                     'spotAge': spotAge,
-                                    'variance': 0,
+                                    'variance': 0.0,
                                     'averageTimeSpent': timeSpent,
-                                    'timeSpentMultiplier': 1 }
+                                    'MtimeSpent': 1.0 }
 
+    DBQuery.closeConnection();
     return parameters
-
-def calculateTimeSpent(checkinTime, nextCheckintime):
-    if (nextCheckintime < checkinTime):
-        return 0
-    d1 = datetime.strptime(checkinTime, '%Y-%m-%d %H:%M:%S')
-    d2 = datetime.strptime(nextCheckintime, '%Y-%m-%d %H:%M:%S')
-    return abs((d2 - d1).seconds//60)
 
 # Spot ages are in days
 def calculateNewSpotAgeMultiplier(parameters, oldestAge):
@@ -114,14 +148,8 @@ def calculateNewSpotAgeMultiplier(parameters, oldestAge):
     # spotAge / oldestSpotAge -> normalizes range to 0-1
     # normalized * 2          -> expands range to 0-2
     multiplier = 1 / ( (float(spotAge)) / float(oldestAge) * multiplierRanges['spotAge'] )
-    if multiplier > 2:
-        print "{0:5} {1:5} {2:5}".format(spotAge, oldestAge, multiplier)
     return multiplier
     
-
-# Wouter: update this and it *should* work... I can check more closely on Sunday
-def calculateNewTimeSpentMultiplier(parameters):
-    return 1
 
 # Calculate new multipliers
 def calculateNewMultipliers(parameters):
@@ -130,9 +158,9 @@ def calculateNewMultipliers(parameters):
     oldestSpotAge = calculateSpotAge(now, creationDateOldestSpot)
 
     for key in parameters:
-        newMultipliers[key] = { 'MspotAge': 0.0, 'MtimeSpent': 0.0 }
+        newMultipliers[key] = { 'MspotAge': 0.0 }
         newMultipliers[key]['MspotAge'] = calculateNewSpotAgeMultiplier(parameters[key], oldestSpotAge)
-        newMultipliers[key]['MtimeSpent'] = calculateNewTimeSpentMultiplier(parameters[key])
+        newMultipliers[key]['MtimeSpent'] = parameters[key]['MtimeSpent']
     return newMultipliers
 
 
@@ -185,7 +213,7 @@ def buildSpotMapping(checkins):
 ####################################
 # Main
 ####################################
-print "Testing..."
+#print "Testing..."
 
 api = WhatsNextApi()
 startDate = "2012-03-13 04:00:00"
@@ -195,33 +223,33 @@ startdt1 = datetime.datetime.strptime(startDate, '%Y-%m-%d %H:%M:%S')
 dt1 = startdt1
 dt2 = dt1 + datetime.timedelta(days=1)
 
-nrDays = 30
+nrDays = 120
 
 for n in range(nrDays):
     date1 = dt1.strftime("%Y-%m-%d %H:%M:%S")
     date2 = dt2.strftime("%Y-%m-%d %H:%M:%S")
-    print "======================================================="
-    print "Getting checkins of day %d..." % n
+    #print "======================================================="
+    #print "Getting checkins of day %d..." % n
     checkins = api.getAllCheckinsBetweenDates(date1, date2)
 
     nrCheckins = len(checkins)
     if nrCheckins > 0:
-        print "\nGot %d checkins" % nrCheckins
-        print "First checkin: %s" % checkins[0].created_on
-        print "Last checkin: %s" % checkins[nrCheckins-1].created_on
+        #print "\nGot %d checkins" % nrCheckins
+        #print "First checkin: %s" % checkins[0].created_on
+        #print "Last checkin: %s" % checkins[nrCheckins-1].created_on
 
         #### Call another function here to change what gets written to database
         spotMapping = buildSpotMapping(checkins)
         ####
         if len(spotMapping) > 1:
-            print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
-            print "\nWriting to DB..."
+            #print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
+            #print "\nWriting to DB..."
             writeToDbNew(spotMapping)
-            print "Done writing to DB..."
+            #print "Done writing to DB..."
         #else:
-            print "\nDidn't find any spot mappings today... :("
+            #print "\nDidn't find any spot mappings today... :("
     #else:
-        print "No checkins today, moving on..."
+        #print "No checkins today, moving on..."
 
     dt1 = dt2
     dt2 = dt1 + datetime.timedelta(days=1)
@@ -229,8 +257,8 @@ for n in range(nrDays):
 
 
 # TODO remove creationDateCalculation when done testing
-print "\nCalculated creation date %d times" % api.creationDateCalculation
+#print "\nCalculated creation date %d times" % api.creationDateCalculation
 
-print "\nTerminating..."
+#print "\nTerminating..."
 
 

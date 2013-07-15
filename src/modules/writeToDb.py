@@ -41,7 +41,7 @@ def writeToDbNew(rows):
         variance = values['variance']
         averageTimeSpent = values['averageTimeSpent']
         MspotAge = values['MspotAge']
-        MtimeSpent = values['timeSpentMultiplier']
+        MtimeSpent = values['MtimeSpent']
         weightedPopularity = values['weightedPopularity']
 
         SELECT = 'SELECT totalCount, COUNT(*) AS "Exists" ' \
@@ -51,7 +51,7 @@ def writeToDbNew(rows):
             totalCount = EXISTArray[0] + dayCount
             QUERY = "UPDATE whatsnext " \
                     "SET totalCount = '%s' AND spotCreationDate = '%s' AND lastOccurrence = '%s' " \
-                    "AND variance = '%s'AND averateTimeSpent = '%s' " \
+                    "AND variance = '%s' AND averageTimeSpent = '%s' " \
                     "AND MspotAge = '%s' AND MtimeSpent = '%s' AND weightedPopularity = '%s'" \
                     "WHERE spotId=%s AND nextSpotId=%s;" % \
                         (totalCount, spotCreationDate, lastOccurrence, variance, averageTimeSpent,
@@ -64,5 +64,6 @@ def writeToDbNew(rows):
                         (spotId, nextSpotId, dayCount, spotCreationDate, lastOccurrence,
                          variance, averageTimeSpent, 
                          MspotAge, MtimeSpent, weightedPopularity)
+        #print QUERY
         DBQuery.writeDB(QUERY)
     DBQuery.closeConnection()
