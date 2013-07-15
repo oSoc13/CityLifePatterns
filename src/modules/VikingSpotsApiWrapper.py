@@ -117,7 +117,7 @@ class VikingSpotsApiWrapper:
         if 200 == jsonData["meta"]["code"]:
             return jsonData["response"]["created_on"]
         else:
-            print jsonData["meta"]["code"]
+            print "VikingSpotsApiWrapper:getSpotCreationDate: meta code=%s" % jsonData["meta"]["code"]
 
 
 

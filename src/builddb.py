@@ -61,7 +61,7 @@ def calculateParameters():
             nextSpotId = nextCheckin.spot_id
             key = (spotId,nextSpotId)
             now = nextCheckin.created_on  # In non-simulation, use current time
-            timeSpent = self.calculateTimeSpent(checkin.created_on, nextCheckin.created_on)
+            timeSpent = calculateTimeSpent(checkin.created_on, nextCheckin.created_on)
             # Save the parameters
             if key in parameters:
                 parameters[key]['dayCount'] += 1
@@ -94,12 +94,12 @@ def calculateParameters():
                                     'lastOccurrence': nextCheckin.created_on, 
                                     'spotAge': spotAge,
                                     'variance': 0,
-                                    'averageTime': timeSpent,
+                                    'averageTimeSpent': timeSpent,
                                     'timeSpentMultiplier': 1 }
 
     return parameters
 
-def calculateTimeSpent(self, checkinTime, nextCheckintime):
+def calculateTimeSpent(checkinTime, nextCheckintime):
     if (nextCheckintime < checkinTime):
         return 0
     d1 = datetime.strptime(checkinTime, '%Y-%m-%d %H:%M:%S')
@@ -185,7 +185,7 @@ def buildSpotMapping(checkins):
 ####################################
 # Main
 ####################################
-#print "Testing..."
+print "Testing..."
 
 api = WhatsNextApi()
 startDate = "2012-03-13 04:00:00"
@@ -200,28 +200,28 @@ nrDays = 30
 for n in range(nrDays):
     date1 = dt1.strftime("%Y-%m-%d %H:%M:%S")
     date2 = dt2.strftime("%Y-%m-%d %H:%M:%S")
-    #print "======================================================="
-    #print "Getting checkins of day %d..." % n
+    print "======================================================="
+    print "Getting checkins of day %d..." % n
     checkins = api.getAllCheckinsBetweenDates(date1, date2)
 
     nrCheckins = len(checkins)
     if nrCheckins > 0:
-        #print "\nGot %d checkins" % nrCheckins
-        #print "First checkin: %s" % checkins[0].created_on
-        #print "Last checkin: %s" % checkins[nrCheckins-1].created_on
+        print "\nGot %d checkins" % nrCheckins
+        print "First checkin: %s" % checkins[0].created_on
+        print "Last checkin: %s" % checkins[nrCheckins-1].created_on
 
         #### Call another function here to change what gets written to database
         spotMapping = buildSpotMapping(checkins)
         ####
         if len(spotMapping) > 1:
-            #print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
-            #print "\nWriting to DB..."
+            print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
+            print "\nWriting to DB..."
             writeToDbNew(spotMapping)
-            #print "Done writing to DB..."
+            print "Done writing to DB..."
         #else:
-            #print "\nDidn't find any spot mappings today... :("
+            print "\nDidn't find any spot mappings today... :("
     #else:
-        #print "No checkins today, moving on..."
+        print "No checkins today, moving on..."
 
     dt1 = dt2
     dt2 = dt1 + datetime.timedelta(days=1)
@@ -229,8 +229,8 @@ for n in range(nrDays):
 
 
 # TODO remove creationDateCalculation when done testing
-#print "\nCalculated creation date %d times" % api.creationDateCalculation
+print "\nCalculated creation date %d times" % api.creationDateCalculation
 
-#print "\nTerminating..."
+print "\nTerminating..."
 
 
