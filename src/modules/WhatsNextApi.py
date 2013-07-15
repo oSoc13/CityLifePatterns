@@ -123,6 +123,7 @@ class WhatsNextApi:
 
 
     ## Getting next spot data  ########################################
+    # TODO! This is not sorted D: FIX!
     def formJsonSpotsArray(self, nextSpots):
         JSON = ""
         JSON += "\"spots\": [ "
@@ -170,8 +171,48 @@ class WhatsNextApi:
     # Must return string
     def getPopularNextSpotsJSON(self, spotId, nrSpots):
         DBQuery.openConnection();
+        queryString = "SELECT nextSpotId, totalCount FROM whatsnext " \
+                      "WHERE spotId = %d " \
+                      "ORDER BY weightedPopularity DESC LIMIT 0, %d" % (spotId, nrSpots)
+        returnedResults = DBQuery.queryDB(queryString)
+        DBQuery.closeConnection();
+
+        nextSpots = []
+        for row in returnedResults:
+            nextSpots.append(row)
+        return self.formJsonResponse(nextSpots)
+
+    # Must return string
+    def getPopularNextSpotsByCountJSON(self, spotId, nrSpots):
+        DBQuery.openConnection();
         queryString = "SELECT nextSpotId, count FROM nextSpotCount "\
                       "WHERE spotId = %d ORDER BY count DESC LIMIT 0, %d" % (spotId, nrSpots)
+        returnedResults = DBQuery.queryDB(queryString)
+        DBQuery.closeConnection();
+
+        nextSpots = []
+        for row in returnedResults:
+            nextSpots.append(row)
+        return self.formJsonResponse(nextSpots)
+
+    # Must return string
+    def getPopularNextSpotsBySpotAgeJSON(self, spotId, nrSpots):
+        DBQuery.openConnection();
+        queryString = "SELECT nextSpotId, totalCount FROM whatsnext "\
+                      "WHERE spotId = %d ORDER BY (totalCount*MspotAge) DESC LIMIT 0, %d" % (spotId, nrSpots)
+        returnedResults = DBQuery.queryDB(queryString)
+        DBQuery.closeConnection();
+
+        nextSpots = []
+        for row in returnedResults:
+            nextSpots.append(row)
+        return self.formJsonResponse(nextSpots)
+
+    # Must return string
+    def getPopularNextSpotsBySpotAgeJSON(self, spotId, nrSpots):
+        DBQuery.openConnection();
+        queryString = "SELECT nextSpotId, totalCount FROM whatsnext "\
+                      "WHERE spotId = %d ORDER BY (totalCount*MtimeSpent) DESC LIMIT 0, %d" % (spotId, nrSpots)
         returnedResults = DBQuery.queryDB(queryString)
         DBQuery.closeConnection();
 
