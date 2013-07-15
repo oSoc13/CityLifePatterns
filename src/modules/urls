@@ -1,0 +1,2 @@
+userActionRequest=https://vikingspots.com/en/api/4/users/actions/
+spotByIdRequest=https://vikingspots.com/en/api/4/spots/getbyid/
