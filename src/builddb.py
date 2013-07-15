@@ -57,20 +57,19 @@ def readVariablesFromDB(key):
                 'storedAverageTimeSpent': float(row[2]), 'oldMultiplier': float(row[3])}
         return variables
     else:
-        return {'totalCount': 1, 'storedAverageVariance': 0.0,
-                'storedAverageTimeSpent': 0.0, 'oldMultiplier': 1}
+        return None
 
 
 def doTimeSpentCalculations(key, parameters, timeSpent):
     variables = readVariablesFromDB(key)
+    if variables == None:
+        return
+
     totalCount = variables['totalCount']
     storedAverageVariance = variables['storedAverageVariance']
     storedAverageTimeSpent = variables['storedAverageTimeSpent']
     oldMultiplier = variables['oldMultiplier']
     thisMultiplier = 1
-
-    if storedAverageTimeSpent == 0.0:
-        storedAverageTimeSpent = timeSpent
 
     newTotalCount = totalCount + 1
     averageTimeSpent = int(float(storedAverageTimeSpent * totalCount) + timeSpent) / newTotalCount
@@ -101,7 +100,7 @@ def calculateTimeSpent(checkinTime, nextCheckintime):
 
 # Multiplier and parameter calculations 
 ##############################################################
-def calculateParameters():
+def calculateParameters(checkins):
     global now
     parameters = {}     # (spotId,nextSpotId) | dayCount | spotCreationDate| lastOccurrence | spotAge
     i = 0               # Used to select checkins after current checkin
@@ -118,9 +117,11 @@ def calculateParameters():
             timeSpent = calculateTimeSpent(checkin.created_on, nextCheckin.created_on)
             # Save the parameters
             if key in parameters:
-                parameters[key] = doTimeSpentCalculations(key, parameters[key], timeSpent)
                 parameters[key]['dayCount'] += 1
                 parameters[key]['lastOccurrence'] = nextCheckin.created_on
+                results = doTimeSpentCalculations(key, parameters[key], timeSpent)
+                if None != results:
+                    parameters[key] = results
             else:
                 if nextSpotId not in spotCreationDates:
                     spotCreationDates[nextSpotId] = str(api.getSpotCreationDate(spotId))
@@ -132,7 +133,6 @@ def calculateParameters():
                                     'variance': 0.0,
                                     'averageTimeSpent': timeSpent,
                                     'MtimeSpent': 1.0 }
-
     DBQuery.closeConnection();
     return parameters
 
@@ -154,7 +154,7 @@ def calculateNewMultipliers(parameters):
     oldestSpotAge = calculateSpotAge(now, creationDateOldestSpot)
 
     for key in parameters:
-        newMultipliers[key] = { 'MspotAge': 0.0 }
+        newMultipliers[key] = {}
         newMultipliers[key]['MspotAge'] = calculateNewSpotAgeMultiplier(parameters[key], oldestSpotAge)
         newMultipliers[key]['MtimeSpent'] = parameters[key]['MtimeSpent']
     return newMultipliers
@@ -191,7 +191,7 @@ def calculateNewWeightedPopularity(multipliers, dayCount):
 #                          int             date           float           float
 def buildSpotMapping(checkins):
     # Build today's parameters
-    parameters = calculateParameters()
+    parameters = calculateParameters(checkins)
     newMultipliers = calculateNewMultipliers(parameters)
 
     dbRows = {}
@@ -209,52 +209,53 @@ def buildSpotMapping(checkins):
 ####################################
 # Main
 ####################################
-#print "Testing..."
+##print "Testing..."
 
-api = WhatsNextApi()
-startDate = "2012-03-13 04:00:00"
-#date2 = "2012-04-01 00:00:00"
+def main():
+    api = WhatsNextApi()
+    startDate = "2012-03-13 04:00:00"
+    #date2 = "2012-04-01 00:00:00"
 
-startdt1 = datetime.datetime.strptime(startDate, '%Y-%m-%d %H:%M:%S')
-dt1 = startdt1
-dt2 = dt1 + datetime.timedelta(days=1)
-
-nrDays = 120
-
-for n in range(nrDays):
-    date1 = dt1.strftime("%Y-%m-%d %H:%M:%S")
-    date2 = dt2.strftime("%Y-%m-%d %H:%M:%S")
-    print "======================================================="
-    print "Getting checkins of day %d..." % n
-    checkins = api.getAllCheckinsBetweenDates(date1, date2)
-
-    nrCheckins = len(checkins)
-    if nrCheckins > 0:
-        print "\nGot %d checkins" % nrCheckins
-        print "First checkin: %s" % checkins[0].created_on
-        print "Last checkin: %s" % checkins[nrCheckins-1].created_on
-
-        #### Call another function here to change what gets written to database
-        spotMapping = buildSpotMapping(checkins)
-        ####
-        if len(spotMapping) > 1:
-            print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
-            print "\nWriting to DB..."
-            writeToDbNew(spotMapping)
-            print "Done writing to DB..."
-        else:
-            print "\nDidn't find any spot mappings today... :("
-    else:
-        print "No checkins today, moving on..."
-
-    dt1 = dt2
+    startdt1 = datetime.datetime.strptime(startDate, '%Y-%m-%d %H:%M:%S')
+    dt1 = startdt1
     dt2 = dt1 + datetime.timedelta(days=1)
 
+    nrDays = 120
+
+    for n in range(nrDays):
+        date1 = dt1.strftime("%Y-%m-%d %H:%M:%S")
+        date2 = dt2.strftime("%Y-%m-%d %H:%M:%S")
+        #print "======================================================="
+        #print "Getting checkins of day %d..." % n
+        checkins = api.getAllCheckinsBetweenDates(date1, date2)
+
+        nrCheckins = len(checkins)
+        if nrCheckins > 0:
+            #print "\nGot %d checkins" % nrCheckins
+            #print "First checkin: %s" % checkins[0].created_on
+            #print "Last checkin: %s" % checkins[nrCheckins-1].created_on
+
+            #### Call another function here to change what gets written to database
+            spotMapping = buildSpotMapping(checkins)
+            ####
+            if len(spotMapping) > 1:
+                #print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
+                #print "\nWriting to DB..."
+                writeToDbNew(spotMapping)
+                #print "Done writing to DB..."
+            #else:
+                #print "\nDidn't find any spot mappings today... :("
+        #else:
+            #print "No checkins today, moving on..."
+
+        dt1 = dt2
+        dt2 = dt1 + datetime.timedelta(days=1)
 
 
-# TODO remove creationDateCalculation when done testing
-#print "\nCalculated creation date %d times" % api.creationDateCalculation
 
-#print "\nTerminating..."
+    # TODO remove creationDateCalculation when done testing
+    ##print "\nCalculated creation date %d times" % api.creationDateCalculation
 
+    ##print "\nTerminating..."
 
+main()
