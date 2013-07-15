@@ -15,7 +15,10 @@ urlpatterns = patterns('',
     #url(r'^api/checkins/day/$', showDayCheckins),
 
     # e.g. ../api/239zajze23/whatsnext/180/
-    url(r'^api/(?P<userToken>[a-zA-Z\d+]*)/whatsnext/(?P<spotId>\d+)/$', whatsNext)         
+    url(r'^api/(?P<userToken>[a-zA-Z\d+]*)/whatsnext/(?P<spotId>\d+)/$', whatsNext),        
+    url(r'^api/(?P<userToken>[a-zA-Z\d+]*)/whatsnextbycount/(?P<spotId>\d+)/$', whatsNextByCount),
+    url(r'^api/(?P<userToken>[a-zA-Z\d+]*)/whatsnextbyage/(?P<spotId>\d+)/$', whatsNextBySpotAge),
+    url(r'^api/(?P<userToken>[a-zA-Z\d+]*)/whatsnextbytimespent/(?P<spotId>\d+)/$', whatsNextByTimeSpent) 
 
     # Example:
     # (r'^vikings/', include('vikings.foo.urls')),
