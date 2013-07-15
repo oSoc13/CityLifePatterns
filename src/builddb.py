@@ -13,7 +13,8 @@ from WhatsNextApi import *
 import VikingSpotsApiWrapper
 from VikingSpotsApiWrapper import *
 from writeToDb import *
-import time                
+import time          
+import math      
 import datetime
 import calendar
 ###################################
@@ -60,10 +61,30 @@ def calculateParameters():
             nextSpotId = nextCheckin.spot_id
             key = (spotId,nextSpotId)
             now = nextCheckin.created_on  # In non-simulation, use current time
+            timeSpent = self.calculateTimeSpent(checkin.created_on, nextCheckin.created_on)
             # Save the parameters
             if key in parameters:
                 parameters[key]['dayCount'] += 1
                 parameters[key]['lastOccurrence'] = nextCheckin.created_on
+                totalCount = 5 #TODO: GET THIS VAR FROM DB
+                storedAverageVariance = 1 #TODO: GET THIS VAR FROM DB
+                storedAverageTimeSpent = 60 #TODO: GET THIS VAR FROM DB
+                oldMultiplier = 2 #TODO: GET THIS VAR FROM DB
+                
+                newTotalCount = totalCount + 1
+                averageTimeSpent = int(float(storedAverageTimeSpent * totalCount) + timeSpent) / newTotalCount
+                sumOfSquares = (storedAverageVariance*(totalCount-1)+(totalCount*storedAverageTimeSpent**2))+(timeSpent**2)
+                variance = int(float( sumOfSquares / (totalCount) ) - float( float(newTotalCount/totalCount) * averageTimeSpent **2))
+                
+                if(storedAverageVariance != 0 and averageTimeSpent != 0):
+                    thisMultiplier = float( 2 * math.exp( - float(float(timeSpent - averageTimeSpent)**2 ) / ( 2 * storedAverageVariance ) ) )
+                else:
+                    thisMultiplier = 1
+                
+                timeMultiplier = float(float(float(oldMultiplier*totalCount) + float(thisMultiplier)*2)/(newTotalCount+1))                    
+                parameters[key]["variance"] = variance
+                parameters[key]["averageTimeSpent"] = averageTimeSpent
+                parameters[key]["timeSpentMultiplier"] = timeMultiplier
             else:
                 if nextSpotId not in spotCreationDates:
                     spotCreationDates[nextSpotId] = str(api.getSpotCreationDate(spotId))
@@ -71,9 +92,19 @@ def calculateParameters():
                 parameters[key] = { 'dayCount': 1, 
                                     'spotCreationDate': spotCreationDates[nextSpotId],
                                     'lastOccurrence': nextCheckin.created_on, 
-                                    'spotAge': spotAge }
+                                    'spotAge': spotAge,
+                                    'variance': 0,
+                                    'averageTime': timeSpent,
+                                    'timeSpentMultiplier': 1 }
+
     return parameters
 
+def calculateTimeSpent(self, checkinTime, nextCheckintime):
+    if (nextCheckintime < checkinTime):
+        return 0
+    d1 = datetime.strptime(checkinTime, '%Y-%m-%d %H:%M:%S')
+    d2 = datetime.strptime(nextCheckintime, '%Y-%m-%d %H:%M:%S')
+    return abs((d2 - d1).seconds//60)
 
 # Spot ages are in days
 def calculateNewSpotAgeMultiplier(parameters, oldestAge):
