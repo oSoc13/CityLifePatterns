@@ -51,7 +51,6 @@ def readVariablesFromDB(key):
     query = "SELECT totalCount, variance, averageTimeSpent, MtimeSpent FROM whatsnext " \
             "WHERE spotId = '%s' AND nextSpotId = '%s';" % (key[0], key[1])
     results = DBQuery.queryDB(query)
-    print results
     if len(results) > 0:
         row = results[0]
         variables = {'totalCount': int(row[0]), 'storedAverageVariance': float(row[1]),
@@ -71,7 +70,6 @@ def doTimeSpentCalculations(key, parameters, timeSpent):
     thisMultiplier = 1
 
     if storedAverageTimeSpent == 0.0:
-        print timeSpent
         storedAverageTimeSpent = timeSpent
 
     newTotalCount = totalCount + 1
@@ -87,8 +85,6 @@ def doTimeSpentCalculations(key, parameters, timeSpent):
     
     timeMultiplier = float(float(float(oldMultiplier*totalCount) + 
                      float(thisMultiplier)*2)/(newTotalCount+1))                    
-
-    print "%f %f %d %f" % (averageTimeSpent, sumOfSquares, variance, timeMultiplier)
 
     parameters['variance'] = variance
     parameters['averageTimeSpent'] = averageTimeSpent
@@ -228,28 +224,28 @@ nrDays = 120
 for n in range(nrDays):
     date1 = dt1.strftime("%Y-%m-%d %H:%M:%S")
     date2 = dt2.strftime("%Y-%m-%d %H:%M:%S")
-    #print "======================================================="
-    #print "Getting checkins of day %d..." % n
+    print "======================================================="
+    print "Getting checkins of day %d..." % n
     checkins = api.getAllCheckinsBetweenDates(date1, date2)
 
     nrCheckins = len(checkins)
     if nrCheckins > 0:
-        #print "\nGot %d checkins" % nrCheckins
-        #print "First checkin: %s" % checkins[0].created_on
-        #print "Last checkin: %s" % checkins[nrCheckins-1].created_on
+        print "\nGot %d checkins" % nrCheckins
+        print "First checkin: %s" % checkins[0].created_on
+        print "Last checkin: %s" % checkins[nrCheckins-1].created_on
 
         #### Call another function here to change what gets written to database
         spotMapping = buildSpotMapping(checkins)
         ####
         if len(spotMapping) > 1:
-            #print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
-            #print "\nWriting to DB..."
+            print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
+            print "\nWriting to DB..."
             writeToDbNew(spotMapping)
-            #print "Done writing to DB..."
-        #else:
-            #print "\nDidn't find any spot mappings today... :("
-    #else:
-        #print "No checkins today, moving on..."
+            print "Done writing to DB..."
+        else:
+            print "\nDidn't find any spot mappings today... :("
+    else:
+        print "No checkins today, moving on..."
 
     dt1 = dt2
     dt2 = dt1 + datetime.timedelta(days=1)
