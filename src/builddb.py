@@ -51,6 +51,7 @@ def readVariablesFromDB(key):
     query = "SELECT totalCount, variance, averageTimeSpent, MtimeSpent FROM whatsnext " \
             "WHERE spotId = '%s' AND nextSpotId = '%s';" % (key[0], key[1])
     results = DBQuery.queryDB(query)
+    print results
     if len(results) > 0:
         row = results[0]
         variables = {'totalCount': int(row[0]), 'storedAverageVariance': float(row[1]),
@@ -221,6 +222,10 @@ def main():
     dt2 = dt1 + datetime.timedelta(days=1)
 
     nrDays = 120
+
+    DBQuery.openConnection();
+    DBQuery.queryDB("TRUNCATE whatsnext;")
+    DBQuery.closeConnection();
 
     for n in range(nrDays):
         date1 = dt1.strftime("%Y-%m-%d %H:%M:%S")

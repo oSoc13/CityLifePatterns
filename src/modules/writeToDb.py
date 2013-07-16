@@ -52,7 +52,7 @@ def writeToDbNew(rows):
         exists = EXISTArray[1]
         if exists:
             totalCount = dbCount + dayCount
-            print "%d = %d + %d" % (totalCount, dbCount, dayCount)
+            print "%f %f" % (variance, MtimeSpent)
             QUERY = "UPDATE whatsnext " \
                     "SET totalCount = '%s', spotCreationDate = '%s', lastOccurrence = '%s', " \
                     "variance = '%s', averageTimeSpent = '%s', " \
@@ -61,7 +61,6 @@ def writeToDbNew(rows):
                         (totalCount, spotCreationDate, lastOccurrence, variance, averageTimeSpent,
                          MspotAge, MtimeSpent, weightedPopularity,
                          spotId, nextSpotId)
-            print QUERY
         else:
             QUERY = "INSERT INTO whatsnext " \
                     "VALUES (NULL,  '%s',  '%s', '%s',  '%s', '%s', '%s', " \
