@@ -1,4 +1,5 @@
-#/bin/bash
+#!/bin/bash
+#This script gets all content from the specified keys in redisKeys.list
 i=0
 cat redisKeys.list | while read line
 

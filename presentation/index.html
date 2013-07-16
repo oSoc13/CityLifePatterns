@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="nl">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>CityLife >> What's Up Next?</title>
+
+		<meta name="description" content="Overview presentation of CityLife What's Up Next developments during oSoc13">
+		<meta name="author" content="Wouter Vandenneucker">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/pandatech.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<div class="overlay" style="position: absolute; width: 100%; height: 100%; top:0; left:0; background: url('img/overlay.png') repeat;"></div>
+		<div class="top-left">
+			<img src="img/citylifelogo.png" style="border: none; background: none; box-shadow: none; width:60%;">
+		</div>
+		<div class="bottom-right" style="">
+			<img src="img/house.png" style="border: none; background: none; box-shadow: none; height:200px;">
+		</div>
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+				<section>
+					<h1 style="font-size: 80px;"><b>CityLife</b></h1>
+					<h5>What's Up Next?</h5>
+					<br />
+					<p>By:<br /><span style="color:#98f864; font-weight: bold">Linsey Raymaekers</span><br /><span style="color:#98f864;  font-weight: bold">Wouter Vandenneucker</span></p>
+				</section>
+				<section>
+                    <h2>The Team</h2>
+                    <br /><br />
+                    <div style="display: table; text-align: center; width: 100%">
+                        <div style="display: table-cell; width: 50%">
+                            <img src="http://summerofcode.be/wp-content/uploads/2013/05/2013-07-01-16.49.31-5.jpg" style="width: 200px" />
+                            <p style="vertical-align: middle;">Linsey Raymaekers<br />@linsey_ray</p>
+                        </div>
+
+                        <div style="display: table-cell; width: 50%;">
+                            <img src="http://summerofcode.be/wp-content/uploads/2013/05/2013-07-01-16.49.31-3.jpg" style="width: 200px" /> <br />
+                            <p style="text-align: center;">Wouter Vandenneucker<br />@woutervddn</p>
+                        </div>
+                    </div>
+				</section>
+				<section>
+                    <h2>Sponsor</h2>
+                    <br /><br />
+                    <div style="display: table; text-align: center; width: 100%">
+                        <div style="display: table-cell; width: 50%;">
+                            <img src="http://mobilevikingsinfo.files.wordpress.com/2011/01/mobile_vikings_logo1.png" style="width: 450px; padding: 15px; shadow: none; border: none; background: white; padding: 20px" />
+                        </div>
+                    </div>
+				</section>
+				<section>
+					<h2>Project</h2>
+                    <div style="display: table; text-align: center; width: 100%">
+                        <div style="display: table-cell; width: 100%; text-align: center">
+                            <p style="text-align: center;">Extend the
+                            <img src="https://citylifeapp.com/static/img/logo.png" style="scale: 1; border: none; vertical-align: middle" />
+                            app: "What's Next?"</p>
+                            <div style="display: table-cell; float: right; width: 100%; text-align: center">
+                                <img src="img/cl1.jpeg" style="width: 300px" />
+                                <img src="img/cl2.jpg" style="width: 300px" />
+                            </div>
+                        </div>
+					</div>
+				</section>
+                    <!--
+				<section>
+					<h2>The Project</h2>
+					<br /><br />
+					<h4>Add 'What's Next?' feature</h4>
+					<h4>(based on current check-in)</h4>
+					<h5> = relevant spots based on current checkin</h4>
+					<h5>Make a RESTful API that returns relevant spots based on the count of next checkins</h4>
+					<h5 class="fragment">Make it smarter</h4>
+				</section>
+                    -->
+				<section>
+					<h2>Development Choices</h2>
+					<br /><br />
+					<div style="display: table;  text-align: center; width: 100%">
+                        <div style="display: table-cell; float: center">
+                            <img src="img/python.png" style="scale: 1; width: 300px" /> <br />
+                            <img src="img/django.png" style="scale: 1; width: 300px;" /> <br />
+                            <img src="img/mysql.jpg" style="scale: 1; width: 300px;" />
+                        </div>
+					</div>
+				</section>
+				<section>
+					<h2>W1 roundup</h2>
+                    <br /><br />
+					<ul>
+						<li>Fetch data from VikingSpots API</li>
+						<li>'Nightscript'</li>
+						<li>Basic implementation</li>
+						<li>Format Redis datadump as JSON</li>
+						
+					</ul>
+				</section>
+				<section>
+					<h2>W2 roundup</h2>
+                    <br /><br />
+					<ul>
+						<li>Process JSON datadump</li>
+                        <li>Move API to server</li>
+                        <li>'Dayscript'</li>
+						<li>Front-end: Chrome extension</li>
+						<li>Add 'weights' and 'multipliers' to algorithm:
+							<ul>
+								<li>Degrade old data</li>
+								<li>Boost new spots</li>
+								<li>Time Spent</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				<section>
+					<h2>W3 roundup</h2>
+                    <br /><br />
+					<ul>
+						<li>Fix server issues</li>
+						<li>Troubleshoot</li>
+						<li>Merge algorithms</li>
+						<li>Documentation</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Issues</h2>
+					<ul>
+						<li>VikingSpots API troubles</li>
+                        <!--
+							<ul>
+								<li>"kinda-less-than-decent" documentation</li>
+								<li>Data not Available</li>
+								<li>API outage</li>
+							</ul>
+                            -->
+						<li>Datadump to JSON</li>
+						<li>Math in Python</li>
+						<li>Extension</li>
+                        <!--
+							<ul>
+                                <li>Chrome extension can listen to page requests</li>
+                                <li>class="fragment">But it can't act on it?</li>
+								<li>Oh wait, it can! By doing some hacker-ish things</li>
+								<li>Oh dammit, it doesn't work with AJAX requests</li>
+								<li>F* it > let's do it with a dirty timeout..</li>
+							</ul>
+                            -->
+					</ul>
+				</section>
+				<section>
+					<h2>DEMO</h2>
+				</section>
+				<section>
+					<iframe src="https://web.citylifeapp.com/" width="400" height="650"></iframe>
+				</section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+			
+			jQuery.fn.topleft = function () {
+				 this.css("position","absolute");
+				 this.css("top", 10 + "px");
+				 this.css("left", 20 + "px");
+				 return this;
+			}
+			jQuery.fn.bottomright = function () {
+				 this.css("position","absolute");
+				 this.css("top", Math.max(0, (($(window).height() - this.outerHeight())) + 
+							                                    $(window).scrollTop()) + "px");
+				 this.css("left", Math.max(0, (($(window).width() - this.outerWidth())) + 
+							                                    $(window).scrollLeft()) + "px");
+				 return this;
+			}
+			
+			$(window).load(function() {
+				$(".top-left").topleft();
+				$(".bottom-right").bottomright();
+				$(".controls").css("display","none");
+				$(window).resize(function() {
+			 		$(".top-left").topleft();
+					$(".bottom-right").bottomright();
+			 		$(".controls").css("display","none");
+			 	});
+			});
+		</script>
+
+	</body>
+</html>
+

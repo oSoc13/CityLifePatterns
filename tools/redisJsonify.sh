@@ -1,4 +1,5 @@
-#/bin/bash
+#!/bin/bash
+#This scripts converts the checkInActions to json; Though we forgot to add " before and after the atribute names
 i=0
 cat checkInActions.list3 | while read line
 
