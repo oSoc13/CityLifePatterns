@@ -6,38 +6,27 @@
 # Testing class
 #
 ###################################
+import sys
+sys.path.insert(0, './modules')    # Specify additional directory to load python modules from
 import WhatsNextApi
 from WhatsNextApi import *
 import VikingSpotsApiWrapper
 from VikingSpotsApiWrapper import *
+from writeToDb import *
+import time                
+import datetime
+import calendar
 ###################################
 
-
-
+api = WhatsNextApi()
 ####################################
 # Test Code   
 ####################################
 print "Testing..."
 
-api = WhatsNextApi()
-#api.writeLastRun()
-dayCheckins = api.getDayCheckins()
-print "nr day checkins %d" % len(dayCheckins)
+json = api.getPopularNextSpotsJSON(180, 10)
+print json
 
-print "printing..."
-#for checkin in dayCheckins:
-    #checkin.toStr()
-    #print checkin.created_on
-
-'''
-api = VikingSpotsApiWrapper()
-checkins = api.getUserActions(0,0)
-'''
-
-
-
-
-print "Terminating..."
-
+print "\nTerminating..."
 
 
