@@ -6,54 +6,79 @@
 # This is the night script that is responsible for updating the WhatsNext database.
 #
 ###################################
+import sys
+sys.path.insert(0, './modules')    # Specify additional directory to load python modules from
+import writeToDb
 import WhatsNextApi
 from WhatsNextApi import *
-import sys
-sys.path.insert(0, './core')    # Specify additional directory to load python modules from
-import writeToDb
+import os.path
+import time                
+import datetime             
+import calendar
 ###################################
 
+baseDir = os.path.dirname(os.path.abspath(__file__))
 api = WhatsNextApi()
-#api.goingToRun()  
+lastRun = ""            # End of last run (date)
+endOfCurrentRun = ""
 
-print "Getting day checkins..."
-checkins = api.getDayCheckins()
-print "Got %d day checkins." % len(checkins)
-spotIds = []
-nextSpotIds = []
-spotMapping = {}
-i = 0   # Used to select checkins after current checkin
+## Helper functions ###########################
+# Write current time to file 'lastrun'
+def nightScriptStart():
+    global lastRun
+    global endOfCurrentRun
+    filepath = os.path.join(baseDir, "lastrun") 
+    if os.path.exists(filepath):
+        file = open(filepath)
+        fileContents = file.read()
+        entries = fileContents.split(": ")
+        lastRun = entries[1]
+        if (lastRun.endswith("\n")):
+            lastRun = lastRun[:-1]
+        date = datetime.datetime.strptime(lastRun, '%Y-%m-%d %H:%M:%S')
+        endDate = date + datetime.timedelta(days=1)
+        endOfCurrentRun = endDate.strftime("%Y-%m-%d %H:%M:%S")
+        api.lastRun = lastRun
+        api.endOfCurrentRun = endOfCurrentRun
+    else:
+        print "First run, will retrieve all checkin data..."
+    filepath = os.path.join(baseDir, "lastrun")
+    file = open(filepath, 'w')
+    contents = 'Night script was last run on: ' + api.endOfCurrentRun
+    file.write(contents)
 
-for checkin in checkins:
-    print checkin.created_on
 
-'''
-# Build a local cache of spot mappings
-print "Processing checkins..."
-print "Nr of checkins = %d" % len(checkins)
-for checkin in checkins:
-    if i % 1000 == 0:
-        print "At checkin %d" % i
-    nextCheckin = api.findNextCheckin(checkin.user_id, checkins[i+1::])
-    if nextCheckin is not None:
-        spotId = checkin.spot_id
-        nextSpotId = nextCheckin.spot_id
-        if (spotId, nextSpotId) in spotMapping:
-            spotMapping[(spotId, nextSpotId)] += 1
-        else:
-            spotMapping[(spotId, nextSpotId)] = 1
-    i += 1
+# Write away info about this run if necessary
+def nightScriptEnd():
+    print "\nTerminating..."
+    return
 
-print "Done processing!"
-'''
+## Main #######################################
+nightScriptStart()
 
-print "Writing to DB..."
-#writeToDb.write(spotMapping)
-'''
-for each in spotMapping:
-    print each
-    print spotMapping[each]
-'''
-print "Done writing to DB!" 
+print "\nLast run: %s" % lastRun
+print "End of current run: %s" % endOfCurrentRun
 
-api.runDone()
+print "\nGetting day checkins..."
+dayCheckins = api.getDayCheckins()
+nrCheckins = len(dayCheckins)
+
+if nrCheckins > 0:
+    print "\nGot %d day checkins" % nrCheckins
+    print "First checkin:  %s" % dayCheckins[0].created_on
+    print "Last checkin: %s" % dayCheckins[nrCheckins-1].created_on
+    spotMapping = buildSpotMapping(dayCheckins)
+    if len(spotMapping) > 0:
+        print "\n%d spot mappings found" % len(spotMapping)
+        print "\nWriting to DB..."
+        writeToDb.write(spotMapping)
+        print "Done writing to DB!" 
+    else:
+        print "\nNo spot mappings found today."
+else:
+    print "\nThere were no checkins today"
+
+nightScriptEnd()
+###################################################################
+
+
