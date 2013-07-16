@@ -29,7 +29,7 @@ class VikingSpotsApiWrapper:
         entries = fileContents.split("=")
         self.token = entries[1]
         if (self.token.endswith("\n")):
-            self.token = self.token[:-2]
+            self.token = self.token[:-1]
 
         # Read urls from file
         # file = open("urls") Doesn't work with Django, use os.path
@@ -37,7 +37,7 @@ class VikingSpotsApiWrapper:
         lines = file.readlines()
         for line in lines:
             if (line.endswith("\n")):
-                line = line[:-2]
+                line = line[:-1]
             pair = line.split("=")
             key = pair[0]
             value = pair[1]

@@ -27,7 +27,7 @@ api = WhatsNextApi()
 oldMultipliers = { }
 spotCreationDates = {}
 multiplierRanges = { 'spotAge': 2, 'timeSpent': 2 }
-weights = {'spotAge': 1.0, 'timeSpent': 0.0}     # Sum must be 1
+weights = {'spotAge': 0.5, 'timeSpent': 0.5}     # Sum must be 1
 
 
 # Helper functions
@@ -48,14 +48,19 @@ def calculateSpotAge(checkinDate, spotCreationDate):
     return abs((d2 - d1).days)
 
 def readVariablesFromDB(key):
-    query = "SELECT totalCount, variance, averageTimeSpent, MtimeSpent FROM whatsnext " \
+    query = "SELECT totalCount, variance, averageTimeSpent, MtimeSpent, weightedPopularity FROM whatsnext " \
             "WHERE spotId = '%s' AND nextSpotId = '%s';" % (key[0], key[1])
+    
+    #print query
     results = DBQuery.queryDB(query)
-    print results
+    #print results
+    
     if len(results) > 0:
+        print results
+        #print len(results)
         row = results[0]
         variables = {'totalCount': int(row[0]), 'storedAverageVariance': float(row[1]),
-                'storedAverageTimeSpent': float(row[2]), 'oldMultiplier': float(row[3])}
+                'storedAverageTimeSpent': float(row[2]), 'oldMultiplier': float(row[3]), 'weightedPopularity': float(row[4])}
         return variables
     else:
         return None
@@ -118,11 +123,31 @@ def calculateParameters(checkins):
             timeSpent = calculateTimeSpent(checkin.created_on, nextCheckin.created_on)
             # Save the parameters
             if key in parameters:
+                storedCount =  parameters[key]['dayCount']
                 parameters[key]['dayCount'] += 1
+                newCount = parameters[key]['dayCount']
+                
+                storedAverageVariance = parameters[key]['variance']
+                storedAverageTimeSpent = parameters[key]['averageTimeSpent']
+                oldMultiplier = parameters[key]['MtimeSpent']
+                
                 parameters[key]['lastOccurrence'] = nextCheckin.created_on
-                results = doTimeSpentCalculations(key, parameters[key], timeSpent)
-                if None != results:
-                    parameters[key] = results
+                
+                averageTimeSpent = int(float(storedAverageTimeSpent * storedCount) + timeSpent) / newCount
+                sumOfSquares = (storedAverageVariance*(storedCount-1)+(storedCount*storedAverageTimeSpent*storedAverageTimeSpent))+(timeSpent*timeSpent)
+                variance = int(float( sumOfSquares / (storedCount) ) - float( float(newCount/storedCount) * averageTimeSpent * averageTimeSpent ))
+                
+                
+                if(storedAverageVariance != 0 and averageTimeSpent != 0):
+                    thisMultiplier = float( 2 * math.exp( - float(float(timeSpent - averageTimeSpent)**2 ) / ( 2 * storedAverageVariance ) ) )
+                else:
+                    thisMultiplier = 1
+                
+                timeMultiplier = float(float(float(oldMultiplier*storedCount) + float(thisMultiplier)*2)/(newCount+1))                    
+                parameters[key]["variance"] = variance
+                parameters[key]["averageTimeSpent"] = averageTimeSpent
+                parameters[key]["MtimeSpent"] = timeMultiplier
+                        
             else:
                 if nextSpotId not in spotCreationDates:
                     spotCreationDates[nextSpotId] = str(api.getSpotCreationDate(spotId))
@@ -144,7 +169,8 @@ def calculateNewSpotAgeMultiplier(parameters, oldestAge):
         return 2
     # spotAge / oldestSpotAge -> normalizes range to 0-1
     # normalized * 2          -> expands range to 0-2
-    multiplier = 1 / ( (float(spotAge)) / float(oldestAge) * multiplierRanges['spotAge'] )
+    multiplier = 1 / ( ((float(spotAge)) / float(oldestAge)) * multiplierRanges['spotAge'] )
+    print "multiplier: %s ; range: %s ; age: %s" % (multiplier, multiplierRanges['spotAge'], float(spotAge) )
     return multiplier
     
 
@@ -153,11 +179,38 @@ def calculateNewMultipliers(parameters):
     newMultipliers = {} # (spotId,nextSpotId) | MspotAge | MlastOccurrence | .. timeSpentW
     creationDateOldestSpot = "2011-11-25 17:34:05" # Hardcoded, comes from spot with id=2
     oldestSpotAge = calculateSpotAge(now, creationDateOldestSpot)
-
+    
+    DBQuery.openConnection();
     for key in parameters:
         newMultipliers[key] = {}
         newMultipliers[key]['MspotAge'] = calculateNewSpotAgeMultiplier(parameters[key], oldestSpotAge)
-        newMultipliers[key]['MtimeSpent'] = parameters[key]['MtimeSpent']
+        
+        variables = readVariablesFromDB(key)
+        if variables != None:
+            databaseCount = variables['totalCount']
+            storedAverageVariance = variables['storedAverageVariance']
+            storedAverageTimeSpent = variables['storedAverageTimeSpent']
+            storedMultiplier = variables['oldMultiplier']
+            dayCount = parameters[key]['dayCount']
+            dayAverageTimeSpent = parameters[key]['averageTimeSpent']
+            dayAverageVariance = parameters[key]['variance']
+            dayMultiplier = parameters[key]['MtimeSpent']
+        
+            totalCount = databaseCount + dayCount
+            
+            averageTimeSpent = int(float(storedAverageTimeSpent * databaseCount) + (dayAverageTimeSpent * dayCount) ) / totalCount
+            sumOfSquares = (storedAverageVariance*(databaseCount-1)+(databaseCount*storedAverageTimeSpent**2))+(dayAverageVariance*(dayCount-1)+(dayCount*dayAverageTimeSpent**2))
+            variance = int(float( sumOfSquares / (totalCount - 1) ) - float( float(totalCount/(totalCount-1)) * averageTimeSpent **2 ))
+            
+            timeMultiplier = float(float(float(storedMultiplier*databaseCount) + float(dayMultiplier*dayCount)*2)/(totalCount+dayCount))
+            newMultipliers[key]["variance"] = variance
+            newMultipliers[key]["averageTimeSpent"] = averageTimeSpent
+            newMultipliers[key]["MtimeSpent"] = timeMultiplier
+        else:
+            newMultipliers[key]["variance"] = parameters[key]['variance']
+            newMultipliers[key]["averageTimeSpent"] = parameters[key]['averageTimeSpent']
+            newMultipliers[key]["MtimeSpent"] = parameters[key]['MtimeSpent']
+    DBQuery.closeConnection();
     return newMultipliers
 
 
@@ -172,13 +225,17 @@ def calculateNewMultipliers(parameters):
 #  x) Uses 'last checkindate' to gauge popularity, this should be optimized
 #   ) Gives new/young spots popularity boost
 #
-def calculateNewWeightedPopularity(multipliers, dayCount):
+def calculateNewWeightedPopularity(multipliers, dayCount,key):
 
     masterMultiplier = weights['spotAge'] * multipliers['MspotAge'] + \
                        weights['timeSpent'] * multipliers['MtimeSpent']
 
     dayPopularity = dayCount * masterMultiplier
-    oldPopularity = 0  # TODO Should be read from DB
+    variables = readVariablesFromDB(key)
+    if variables != None:
+        oldPopularity = variables['weightedPopularity']
+    else:
+        oldPopularity = 1  # TODO Should be read from DB
     alpha = 0.7
     beta = 0.3
     newPopularity = (alpha * oldPopularity) + (beta * dayPopularity)
@@ -197,14 +254,18 @@ def buildSpotMapping(checkins):
 
     dbRows = {}
     weightedPopularity = {}
+    DBQuery.openConnection();
     for key in parameters:
         weightedPopularity[key] = {}
         weightedPopularity[key]['weightedPopularity'] = calculateNewWeightedPopularity(
                                                             newMultipliers[key], 
-                                                            parameters[key]['dayCount'])
+                                                            parameters[key]['dayCount'],key)
+        parameters[key].pop("variance", None)
+        parameters[key].pop("averageTimeSpent", None)
+        parameters[key].pop("MtimeSpent", None)
         dbRows[key] = dict(parameters[key].items() + newMultipliers[key].items() + \
                            weightedPopularity[key].items())
-
+    DBQuery.closeConnection();
     return dbRows
 
 ####################################
