@@ -50,71 +50,98 @@
 					<p>By:<br /><span style="color:#98f864; font-weight: bold">Linsey Raymaekers</span><br /><span style="color:#98f864;  font-weight: bold">Wouter Vandenneucker</span></p>
 				</section>
 				<section>
-					<h2>MV team 1</h2>
-					<h4>relevant spots based on last checkin</h4>
+                    <h2>The Team</h2>
+                    <br /><br />
+                    <div style="display: table; text-align: center; width: 100%">
+                        <div style="display: table-cell; width: 50%">
+                            <img src="http://summerofcode.be/wp-content/uploads/2013/05/2013-07-01-16.49.31-5.jpg" style="width: 200px" />
+                            <p style="vertical-align: middle;">Linsey Raymaekers<br />@linsey_ray</p>
+                        </div>
+
+                        <div style="display: table-cell; width: 50%;">
+                            <img src="http://summerofcode.be/wp-content/uploads/2013/05/2013-07-01-16.49.31-3.jpg" style="width: 200px" /> <br />
+                            <p style="text-align: center;">Wouter Vandenneucker<br />@woutervddn</p>
+                        </div>
+                    </div>
+				</section>
+				<section>
+                    <h2>Sponsor</h2>
+                    <br /><br />
+                    <div style="display: table; text-align: center; width: 100%">
+                        <div style="display: table-cell; width: 50%;">
+                            <img src="http://mobilevikingsinfo.files.wordpress.com/2011/01/mobile_vikings_logo1.png" style="width: 450px; padding: 15px; shadow: none; border: none; background: white; padding: 20px" />
+                        </div>
+                    </div>
+				</section>
+				<section>
+					<h2>Project</h2>
+                    <div style="display: table; text-align: center; width: 100%">
+                        <div style="display: table-cell; width: 100%; text-align: center">
+                            <p style="text-align: center;">Extend the
+                            <img src="https://citylifeapp.com/static/img/logo.png" style="scale: 1; border: none; vertical-align: middle" />
+                            app: "What's Next?"</p>
+                            <div style="display: table-cell; float: right; width: 100%; text-align: center">
+                                <img src="img/cl1.jpeg" style="width: 300px" />
+                                <img src="img/cl2.jpg" style="width: 300px" />
+                            </div>
+                        </div>
+					</div>
+				</section>
+                    <!--
+				<section>
+					<h2>The Project</h2>
 					<br /><br />
-					<div style="width: 50%; float: left;">
-						<img src="http://summerofcode.be/wp-content/uploads/2013/05/2013-07-01-16.49.31-5.jpg" style="float: left; width: 200px" />
-						<div style="float: left; font-size: 0,75em;">
-							<p style="text-align: left;">Linsey Raymaekers<br />@Linsey_ray</p>
-						</div>
-					</div>
-					<div style="width: 50%; float: right;">
-						<img src="http://summerofcode.be/wp-content/uploads/2013/05/2013-07-01-16.49.31-3.jpg" style="float: right; width: 200px" />
-						<div style="float: right; font-size: 0,75em;">
-							<p style="text-align: right;">Wouter Vandenneucker<br />@woutervddn</p>
-						</div>
-					</div>
-					<img src="http://www.lustrumaugustinus.nl/uploads/images/mv-logo.png" style="width: 200px; position: relative; top: -400px; background: white; padding: 15px; shadow: none; border: none;" class="fragment"/>
+					<h4>Add 'What's Next?' feature</h4>
+					<h4>(based on current check-in)</h4>
+					<h5> = relevant spots based on current checkin</h4>
+					<h5>Make a RESTful API that returns relevant spots based on the count of next checkins</h4>
+					<h5 class="fragment">Make it smarter</h4>
 				</section>
+                    -->
 				<section>
-					<h2>Goal</h2>
-					<h4>Make a RESTful API that returns relevant spots based on the count of next checkins</h4>
-					<h4 class="fragment">Make it smarter</h4>
-				</section>
-				<section>
-					<h2>DEV choices</h2>
-					<h4>Python & Django since MV is already using that</h4>
-					<h4>MySQL instead of MV standard (Redis)</h4>
-					<br />
-					<p class="fragment"><b>Why SQL?</b></p>
-					<p class="fragment">Our systems can't handle Redis</p>
-					<p class="fragment">Easier to implement</p>
-					<p class="fragment">Can be changed easily</p>
+					<h2>Development Choices</h2>
+					<br /><br />
+					<div style="display: table;  text-align: center; width: 100%">
+                        <div style="display: table-cell; float: center">
+                            <img src="img/python.png" style="scale: 1; width: 300px" /> <br />
+                            <img src="img/django.png" style="scale: 1; width: 300px;" /> <br />
+                            <img src="img/mysql.jpg" style="scale: 1; width: 300px;" />
+                        </div>
+					</div>
 				</section>
 				<section>
 					<h2>W1 roundup</h2>
+                    <br /><br />
 					<ul>
-						<li>Ask for data</li>
-						<li>Work with all UserActions</li>
-						<li>Make nightscript for processing</li>
-						<li>Install Django</li>
-						<li>Working example based on all User Actions <br />('love','spot created', '...')</li>
-						<li>Redis datadump > format as JSON</li>
+						<li>Fetch data from VikingSpots API</li>
+						<li>'Nightscript'</li>
+						<li>Basic implementation</li>
+						<li>Format Redis datadump as JSON</li>
 						
 					</ul>
 				</section>
 				<section>
 					<h2>W2 roundup</h2>
+                    <br /><br />
 					<ul>
-						<li>Visualization: Chrome extension</li>
-						<li>Fix dataDump.json</li>
-						<li>Process it</li>
-						<li>From count to weight
+						<li>Process JSON datadump</li>
+                        <li>Move API to server</li>
+                        <li>'Dayscript'</li>
+						<li>Front-end: Chrome extension</li>
+						<li>Add 'weights' and 'multipliers' to algorithm:
 							<ul>
-								<li class="fragment">degrade old data</li>
-								<li class="fragment">boost new spots</li>
-								<li class="fragment">variance-TimeSpent</li>
+								<li>Degrade old data</li>
+								<li>Boost new spots</li>
+								<li>Time Spent</li>
 							</ul>
 						</li>
-						<div class="fragment"><li>Make algorithms & write code</li>
-						<li>Make API work on server</li></div>
 					</ul>
 				</section>
 				<section>
 					<h2>W3 roundup</h2>
+                    <br /><br />
 					<ul>
-						<li>Fix the server</li>
+						<li>Fix server issues</li>
 						<li>Troubleshoot</li>
 						<li>Merge algorithms</li>
 						<li>Documentation</li>
@@ -123,22 +150,26 @@
 				<section>
 					<h2>Issues</h2>
 					<ul>
-						<li>API troubles</li>
+						<li>VikingSpots API troubles</li>
+                        <!--
 							<ul>
-								<li class="fragment">"kinda-less-than-decent" documentation</li>
-								<li class="fragment">Data not Available</li>
-								<li class="fragment">API outage</li>
+								<li>"kinda-less-than-decent" documentation</li>
+								<li>Data not Available</li>
+								<li>API outage</li>
 							</ul>
-						<li class="fragment">Datadump to JSON</li>
-						<li class="fragment">Math in Python is a b*tch</li>
-						<li class="fragment">Extension</li>
+                            -->
+						<li>Datadump to JSON</li>
+						<li>Math in Python</li>
+						<li>Extension</li>
+                        <!--
 							<ul>
-								<li class="fragment">Chrome extension can listen to page requests</li>
-								<li class="fragment">But it can't act on it?</li>
-								<li class="fragment">Oh wait, it can! By doing some hacker-ish things</li>
-								<li class="fragment">Oh dammit, it doesn't work with AJAX requests</li>
-								<li class="fragment">F* it > let's do it with a dirty timeout..</li>
+                                <li>Chrome extension can listen to page requests</li>
+                                <li>class="fragment">But it can't act on it?</li>
+								<li>Oh wait, it can! By doing some hacker-ish things</li>
+								<li>Oh dammit, it doesn't work with AJAX requests</li>
+								<li>F* it > let's do it with a dirty timeout..</li>
 							</ul>
+                            -->
 					</ul>
 				</section>
 				<section>
