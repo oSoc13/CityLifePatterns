@@ -125,7 +125,7 @@ function whatsUpNext(spotID) {
 //After whatsUpNext has made sure we've got the userToken and the spotID, we request the next spots from our Django API
 //For now, that Django instance runs locally (hence the 127.0.0.1 url)
 function requestJson(token, spotID) {
-    var whatsNextUrl = "http://osoc.webvi.be/api/" + token + "/whatsnext/" + spotID + "/";
+    var whatsNextUrl = "http://osoc.webvi.be/api/" + token + "/whatsnextbycount/" + spotID + "/";
     
     //Request a json response from the above url and on succes, handle upon it.
     $.ajax({
