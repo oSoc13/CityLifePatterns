@@ -65,13 +65,20 @@
                     </div>
 				</section>
 				<section>
-                    <h2>Sponsor</h2>
-                    <br /><br />
-                    <div style="display: table; text-align: center; width: 100%">
-                        <div style="display: table-cell; width: 50%;">
-                            <img src="http://mobilevikingsinfo.files.wordpress.com/2011/01/mobile_vikings_logo1.png" style="width: 450px; padding: 15px; shadow: none; border: none; background: white; padding: 20px" />
-                        </div>
-                    </div>
+					<h2>Sponsor</h2>
+					<br /><br />
+					<div style="display: table; text-align: center; width: 100%">
+					    <div style="display: table-cell; width: 50%;">
+						<img src="http://mobilevikingsinfo.files.wordpress.com/2011/01/mobile_vikings_logo1.png" style="width: 450px; padding: 15px; shadow: none; border: none; background: white; padding: 20px" />
+					    </div>
+					</div>
+				</section>
+				<section>
+				    <div style="display: block; width: 100%;">
+					<img src="img/citylifeBig.png" style="shadow: none; border: none;" /><br />
+					<img src="img/cl1.jpeg" style="width: 300px" />
+					<img src="img/cl2.jpg" style="width: 300px" />
+				    </div>
 				</section>
 				<section>
 					<h2>Project</h2>
@@ -80,10 +87,13 @@
                             <p style="text-align: center;">Extend the
                             <img src="https://citylifeapp.com/static/img/logo.png" style="scale: 1; border: none; vertical-align: middle" />
                             app: "What's Next?"</p>
-                            <div style="display: table-cell; float: right; width: 100%; text-align: center">
-                                <img src="img/cl1.jpeg" style="width: 300px" />
-                                <img src="img/cl2.jpg" style="width: 300px" />
-                            </div>
+			    <div>
+
+				<img class="fragment icon" src="img/bullseye.svg" />
+				<img class="fragment icon" src="img/flask/noun_project_337.svg" />
+				<img class="fragment icon" src="img/noun_project_16305.svg" />
+			    </div>
+                           
                         </div>
 					</div>
 				</section>
@@ -111,46 +121,39 @@
 				</section>
 				<section>
 					<h2>W1 roundup</h2>
-                    <br /><br />
+                    <br />
 					<ul>
-						<li>Fetch data from VikingSpots API</li>
+						<li>Fetch data</li>
 						<li>'Nightscript'</li>
-						<li>Basic implementation</li>
-						<li>Format Redis datadump as JSON</li>
-						
+						<li>Base code</li>
+						<li>Format datadump</li>
 					</ul>
 				</section>
 				<section>
 					<h2>W2 roundup</h2>
-                    <br /><br />
+                    <br />
 					<ul>
-						<li>Process JSON datadump</li>
-                        <li>Move API to server</li>
-                        <li>'Dayscript'</li>
-						<li>Front-end: Chrome extension</li>
-						<li>Add 'weights' and 'multipliers' to algorithm:
-							<ul>
-								<li>Degrade old data</li>
-								<li>Boost new spots</li>
-								<li>Time Spent</li>
-							</ul>
-						</li>
+						<li>Process JSON</li>
+						<li>API to server</li>
+						<li>'Dayscript'</li>
+						<li>Chrome extension</li>
+						<li>'Weights' & 'multipliers'</li>
 					</ul>
 				</section>
 				<section>
 					<h2>W3 roundup</h2>
-                    <br /><br />
+                    <br />
 					<ul>
-						<li>Fix server issues</li>
+						<li>Fix server</li>
 						<li>Troubleshoot</li>
 						<li>Merge algorithms</li>
 						<li>Documentation</li>
 					</ul>
 				</section>
 				<section>
-					<h2>Issues</h2>
+					<h2>Challenges</h2>
 					<ul>
-						<li>VikingSpots API troubles</li>
+						<li>VikingSpots API issues</li>
                         <!--
 							<ul>
 								<li>"kinda-less-than-decent" documentation</li>
@@ -159,6 +162,7 @@
 							</ul>
                             -->
 						<li>Datadump to JSON</li>
+						<li>New to Python & Django</li>
 						<li>Math in Python</li>
 						<li>Extension</li>
                         <!--
@@ -176,7 +180,10 @@
 					<h2>DEMO</h2>
 				</section>
 				<section>
-					<iframe src="https://web.citylifeapp.com/" width="400" height="650"></iframe>
+					<div class="phone-container" style="height: 633px; width: 400px; margin-left: auto; margin-right: auto;">
+						<img src="img/phone.svg" style="position: relative; max-width: 100%; max-height: 100%; width: 100%; height: 100%;"/>
+						<iframe src="https://web.citylifeapp.com/" width="334" height="466" style="position: relative; top: -600px;"></iframe>
+					</div>
 				</section>
 			</div>
 
@@ -230,12 +237,14 @@
 				$(".top-left").topleft();
 				$(".bottom-right").bottomright();
 				$(".controls").css("display","none");
-				$(window).resize(function() {
+				$(".phone-container").center();
+			});
+			$(window).resize(function() {
 			 		$(".top-left").topleft();
 					$(".bottom-right").bottomright();
 			 		$(".controls").css("display","none");
+					$(".phone-container").center();
 			 	});
-			});
 		</script>
 
 	</body>
