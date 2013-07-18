@@ -24,7 +24,7 @@ api = WhatsNextApi()
 ####################################
 print "Testing..."
 
-json = api.getPopularNextSpotsJSON(7, 10)
+json = api.getPopularNextSpotsJSON(7, 10, '2dad11c572f4ba859608519ff3f3e4de0a6d45e5')
 print json
 
 print "\nTerminating..."

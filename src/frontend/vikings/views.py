@@ -29,8 +29,7 @@ def showDayCheckins(request):
 # Note: arguments passed as string
 def whatsNext(request, userToken, spotId): 
     spotId = int(spotId)
-    api.useToken(userToken)
-    json = api.getPopularNextSpotsJSON(spotId, 10)
+    json = api.getPopularNextSpotsJSON(spotId, 10, userToken)
     response = HttpResponse(json, content_type="application/json")
     response["Access-Control-Allow-Origin"] = "*"
     response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
@@ -42,8 +41,7 @@ def whatsNext(request, userToken, spotId):
 
 def whatsNextByCount(request, userToken, spotId): 
     spotId = int(spotId)
-    api.useToken(userToken)
-    json = api.getPopularNextSpotsByCountJSON(spotId, 10)
+    json = api.getPopularNextSpotsByCountJSON(spotId, 10, userToken)
     response = HttpResponse(json, content_type="application/json")
     response["Access-Control-Allow-Origin"] = "*"
     response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
@@ -55,8 +53,7 @@ def whatsNextByCount(request, userToken, spotId):
 
 def whatsNextBySpotAge(request, userToken, spotId): 
     spotId = int(spotId)
-    api.useToken(userToken)
-    json = api.getPopularNextSpotsBySpotAgeJSON(spotId, 10)
+    json = api.getPopularNextSpotsBySpotAgeJSON(spotId, 10, userToken)
     response = HttpResponse(json, content_type="application/json")
     response["Access-Control-Allow-Origin"] = "*"
     response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
@@ -68,8 +65,7 @@ def whatsNextBySpotAge(request, userToken, spotId):
 
 def whatsNextByTimeSpent(request, userToken, spotId): 
     spotId = int(spotId)
-    api.useToken(userToken)
-    json = api.getPopularNextSpotsByTimeSpentJSON(spotId, 10)
+    json = api.getPopularNextSpotsByTimeSpentJSON(spotId, 10, userToken)
     response = HttpResponse(json, content_type="application/json")
     response["Access-Control-Allow-Origin"] = "*"
     response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"

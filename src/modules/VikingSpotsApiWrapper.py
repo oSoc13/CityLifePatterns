@@ -70,8 +70,8 @@ class VikingSpotsApiWrapper:
             return None
 
     # Returns spot as JSON string
-    def getSpotByIdJSON(self, spotId):
-        jsonData = self.__getSpotDataAsJson(spotId)
+    def getSpotByIdJSON(self, spotId, userToken=''):
+        jsonData = self.__getSpotDataAsJson(spotId, userToken)
         if self.__isResponseOK(jsonData):
             spotJSON = json.dumps(jsonData['response']) # spotJSON = string
             return spotJSON
@@ -80,9 +80,13 @@ class VikingSpotsApiWrapper:
             return json.dumps(jsonData['meta']['code'])
 
     # Sends URL to VikingSpots API and returns response as json
-    def __getSpotDataAsJson(self, spotId):
+    def __getSpotDataAsJson(self, spotId, userToken=''):
         url = self.__urls['importSpotByIdRequest']
-        params = {'bearer_token': self.token, 'spot_id': spotId}
+        params = {}
+        if '' == userToken:
+            params = {'bearer_token': self.token, 'spot_id': spotId}
+        else:
+            params = {'bearer_token': userToken, 'spot_id': spotId}
         resp = requests.get(url, params=params, verify=False)
         return resp.json()
 

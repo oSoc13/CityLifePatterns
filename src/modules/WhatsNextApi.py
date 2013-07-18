@@ -19,29 +19,29 @@ class WhatsNextApi:
     #   Each function returns spots based on different multipliers (for testing purposes), see comment at each function.
 
     # Uses all weights
-    def getPopularNextSpotsJSON(self, spotId, nrSpots):
+    def getPopularNextSpotsJSON(self, spotId, nrSpots, userToken=''):
         query = 'SELECT nextSpotId FROM whatsnext ' \
                       'WHERE spotId = %d ' \
                       'ORDER BY weightedPopularity DESC LIMIT 0, %d' % (spotId, nrSpots)
-        return self.__resultsOfQueryAsJson(query)
+        return self.__resultsOfQueryAsJson(query, userToken)
 
     # Uses only the total count per spot mapping
-    def getPopularNextSpotsByCountJSON(self, spotId, nrSpots):
+    def getPopularNextSpotsByCountJSON(self, spotId, nrSpots, userToken=''):
         query = 'SELECT nextSpotId FROM whatsnext '\
                       'WHERE spotId = %d ORDER BY totalCount DESC LIMIT 0, %d' % (spotId, nrSpots)
-        return self.__resultsOfQueryAsJson(query)
+        return self.__resultsOfQueryAsJson(query, userToken)
 
     # Uses only the spot age weight
-    def getPopularNextSpotsBySpotAgeJSON(self, spotId, nrSpots):
+    def getPopularNextSpotsBySpotAgeJSON(self, spotId, nrSpots, userToken=''):
         query = 'SELECT nextSpotId FROM whatsnext '\
                       'WHERE spotId = %d ORDER BY (totalCount*MspotAge) DESC LIMIT 0, %d' % (spotId, nrSpots)
-        return self.__resultsOfQueryAsJson(query)
+        return self.__resultsOfQueryAsJson(query, userToken)
 
     # Uses only the time spent weight
-    def getPopularNextSpotsByTimeSpentJSON(self, spotId, nrSpots):
+    def getPopularNextSpotsByTimeSpentJSON(self, spotId, nrSpots, userToken=''):
         query = 'SELECT nextSpotId FROM whatsnext '\
                       'WHERE spotId = %d ORDER BY (totalCount*MtimeSpent) DESC LIMIT 0, %d' % (spotId, nrSpots)
-        return self.__resultsOfQueryAsJson(query)
+        return self.__resultsOfQueryAsJson(query, userToken)
 
 
     # MISC.
@@ -66,27 +66,27 @@ class WhatsNextApi:
         nextSpots = []
         for row in results:
             nextSpots.append(row)
-        return self.__formJsonResponse(nextSpots)
+        return self.__formJsonResponse(nextSpots, userToken)
 
-    def __formJsonResponse(self, nextSpots):
+    def __formJsonResponse(self, nextSpots, userToken=''):
         nrSpots = len(nextSpots)
         JSON = '{ '
         JSON += '\"meta\": { \"code\": \"200\" }, '
         JSON += '\"response\": { '
         if nrSpots > 1:
             JSON +='\"count\": \"%d\", ' % nrSpots
-            JSON += self.__formJsonSpotsArray(nextSpots)
+            JSON += self.__formJsonSpotsArray(nextSpots, userToken)
         else:
             JSON +='\"count\": 0 '
         JSON += '} }'
         return JSON
 
     # TODO! This is not sorted D: FIX!
-    def __formJsonSpotsArray(self, nextSpots):
+    def __formJsonSpotsArray(self, nextSpots, userToken=''):
         JSON = ''
         JSON += '\"spots\": [ '
         for spotId in nextSpots:
-            spotJSON = self.__vsApi.getSpotByIdJSON(spotId)
+            spotJSON = self.__vsApi.getSpotByIdJSON(spotId, userToken)
             if spotJSON is not None:
                 JSON += spotJSON
                 JSON += ', '
