@@ -274,6 +274,7 @@ class DatabaseBuilder():
         if len(results)> 0:
             row = results[0]
             if row[0] != "None":
+                print row[0]
                 dbSpotCount = int(row[0])
             else:
                 dbSpotCount = 0
