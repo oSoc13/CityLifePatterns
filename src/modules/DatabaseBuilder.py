@@ -192,8 +192,6 @@ class DatabaseBuilder():
         # normalized * 2          -> expands range to 0-2
         
         multiplier = (((float(oldestAge)-float(spotAge)) / float(oldestAge))* self.__multiplierRanges['spotAge'] )
-        print "multiplier: %s ; range: %s ; age: %s" % (multiplier, self.__multiplierRanges['spotAge'], float(spotAge) )
-        print "(( (1 / (%s) / %s) * %s )" % (float(spotAge), float(oldestAge), self.__multiplierRanges['spotAge'])
         return multiplier
 
     # Calculate new multipliers
@@ -288,14 +286,10 @@ class DatabaseBuilder():
     def __readVariablesFromDB(self, key):
         query = "SELECT totalCount, variance, averageTimeSpent, MtimeSpent, weightedPopularity FROM whatsnext " \
                 "WHERE spotId = '%s' AND nextSpotId = '%s';" % (key[0], key[1])
-
-        #print query
+        
         results = DBQuery.queryDB(query)
-        #print results
 
         if len(results) > 0:
-            print results
-            #print len(results)
             row = results[0]
             variables = {'totalCount': int(row[0]), 'storedAverageVariance': float(row[1]),
                          'storedAverageTimeSpent': float(row[2]), 'oldMultiplier': float(row[3]), 'weightedPopularity': float(row[4])}
