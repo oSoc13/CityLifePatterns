@@ -282,6 +282,8 @@ class DatabaseBuilder():
             dbSpotCount = 0
         
         mappedNewPopularity = newPopularity / (dbSpotCount+dayCount)* 100
+        if key == (7,32):
+            print "%s = newPopularity / (%s+%s)* 100" % (mappedNewPopularity, dbSpotCount, dayCount)
         newPopularity = mappedNewPopularity
         
         print "oldpop: %s | daypop: %s | newpop: %s" % (oldPopularity, dayPopularity, newPopularity)
