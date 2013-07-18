@@ -269,6 +269,7 @@ class DatabaseBuilder():
         DBQuery.openConnection();
         query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s" % key[0]
         results = DBQuery.queryDB(query)
+        print results
         DBQuery.closeConnection();
         if len(results) > 0:
             row = results[0]
