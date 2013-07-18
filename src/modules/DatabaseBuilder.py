@@ -271,9 +271,8 @@ class DatabaseBuilder():
         results = DBQuery.queryDB(query)
         print results
         DBQuery.closeConnection();
-        if len(results)> 0:
+        if len(results)> 0 and row[0] != "None":
             row = results[0]
-            print row[0]
             dbSpotCount = int(row[0])
         else:
             dbSpotCount = 0
