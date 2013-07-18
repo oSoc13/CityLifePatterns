@@ -296,11 +296,11 @@ class DatabaseBuilder():
             if row[0] != None:
                 dbSpotCount = int(row[0])
             else:
-                dbSpotCount = 1
+                dbSpotCount = 0
         else:
-            dbSpotCount = 1 
+            dbSpotCount = 0 
         
-        mappedNewPopularity = newPopularity / (dbSpotCount)* 100
+        mappedNewPopularity = newPopularity / (dbSpotCount+1)* 100
         newPopularity = mappedNewPopularity
         
         print "oldpop: %s | daypop: %s | newpop: %s | age: %s | time: %s" % (oldPopularity, dayPopularity, newPopularity,  multipliers['MspotAge'], multipliers['MtimeSpent'])
