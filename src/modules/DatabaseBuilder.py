@@ -289,18 +289,18 @@ class DatabaseBuilder():
         newPopularity = (alpha * oldPopularity) + dayPopularity
         
         #now map this popularity from 0 to 100
-        query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s" % key[0]
+        query = "SELECT sum(weightedPopularity) FROM whatsnext WHERE spotId = %s" % key[0]
         results = DBQuery.queryDB(query)
         if len(results)> 0:
             row = results[0]
             if row[0] != None:
-                dbSpotCount = int(row[0])
+                dbSpotPop = int(row[0])
             else:
-                dbSpotCount = 0
+                dbSpotPop = 0
         else:
-            dbSpotCount = 0
+            dbSpotPop = 0
         
-        mappedNewPopularity = newPopularity / (dbSpotCount+dayCount)* 100
+        mappedNewPopularity = newPopularity / (dbSpotPop+newPopularity)* 100
         newPopularity = mappedNewPopularity
         
         print "oldpop: %s | daypop: %s | newpop: %s | age: %s | time: %s" % (oldPopularity, dayPopularity, newPopularity,  multipliers['MspotAge'], multipliers['MtimeSpent'])
