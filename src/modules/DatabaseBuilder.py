@@ -53,8 +53,8 @@ class DatabaseBuilder():
         for n in range(nrDays):
             date1 = dt1.strftime("%Y-%m-%d %H:%M:%S")
             date2 = dt2.strftime("%Y-%m-%d %H:%M:%S")
-            #print "======================================================="
-            #print "Getting checkins of day %d..." % n
+            print "======================================================="
+            print "Getting checkins of day %d..." % n
             checkins = self.__getAllCheckinsBetweenDates(date1, date2)
 
             nrCheckins = len(checkins)
