@@ -66,7 +66,7 @@ class DatabaseBuilder():
                 #### Call another function here to change what gets written to database
                 spotMapping = self.buildSpotMapping(checkins)
                 ####
-                if len(spotMapping) > 1:
+                if len(spotMapping) > 0:
                     #print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
                     #print "\nWriting to DB..."
                     writeToDbNew(spotMapping)

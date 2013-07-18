@@ -72,15 +72,18 @@ def writeToDbNew(rows):
     DBQuery.closeConnection()
 
 def updateDb(multipliers):
-    DBQuery.openConnection()
-    for key in multipliers:
-        spotId = key[0]
-        nextSpotId = key[1]
-        MspotAge = multipliers[key]['MspotAge']
-        weightedPopularity = multipliers[key]['weightedPopularity']
-        
-        QUERY = "UPDATE whatsnext SET MspotAge = '%s', weightedPopularity = '%s' WHERE spotId = '%s' AND nextSpotId = '%s';" % \
-                        (MspotAge, weightedPopularity, spotId, nextSpotId)
-
-    DBQuery.writeDB(QUERY)
-    DBQuery.closeConnection()
+    
+    if len(multipliers) > 0:
+        DBQuery.openConnection()
+        for key in multipliers:
+            spotId = key[0]
+            nextSpotId = key[1]
+            MspotAge = multipliers[key]['MspotAge']
+            weightedPopularity = multipliers[key]['weightedPopularity']
+            
+            QUERY = "UPDATE whatsnext SET MspotAge = '%s', weightedPopularity = '%s' WHERE spotId = '%s' AND nextSpotId = '%s';" % \
+                            (MspotAge, weightedPopularity, spotId, nextSpotId)
+            dbReturn = DBQuery.writeDB(QUERY)
+        DBQuery.closeConnection()
+    
+    
