@@ -49,7 +49,7 @@ class DatabaseBuilder():
         DBQuery.closeConnection();
 
         # TODO change this so it spans all checkins
-        nrDays = 120
+        nrDays = 7
         for n in range(nrDays):
             date1 = dt1.strftime("%Y-%m-%d %H:%M:%S")
             date2 = dt2.strftime("%Y-%m-%d %H:%M:%S")
