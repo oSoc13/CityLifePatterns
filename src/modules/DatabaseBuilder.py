@@ -7,17 +7,12 @@
 #
 ###################################
 import sys
-sys.path.insert(0, './modules')    # Specify additional directory to load python modules from
-import WhatsNextApi
-from WhatsNextApi import *
 import VikingSpotsApiWrapper
 from VikingSpotsApiWrapper import *
 import writeToDb
 from writeToDb import *
-import time          
-import math      
+import math
 import datetime
-import calendar
 import DBQuery
 ###################################
 
