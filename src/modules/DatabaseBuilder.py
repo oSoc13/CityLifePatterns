@@ -263,7 +263,7 @@ class DatabaseBuilder():
         beta = 1 / 1.7
         
         #newPopularity = alpha * oldPopularity + beta * dayPopularity
-        oldPopularity = databaseCount * oldPopularity        
+        oldPopularity = databaseCount * oldPopularity / 100        
         newPopularity = (alpha * oldPopularity) + (beta * dayPopularity)
         
         #now map this popularity from 0 to 100
