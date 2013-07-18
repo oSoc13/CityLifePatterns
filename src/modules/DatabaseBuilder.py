@@ -250,25 +250,26 @@ class DatabaseBuilder():
                            self.__weights['timeSpent'] * multipliers['MtimeSpent']
         
         dayPopularity = dayCount * masterMultiplier
-        print "daypop: %s | dayCount: %s" % (dayPopularity, dayCount)
+        print "daypop: %s | dayCount: %s" % (dayPopularity, dayCount);
         variables = self.__readVariablesFromDB(key)
         if variables != None:
             oldPopularity = variables['weightedPopularity']
+            databaseCount = variables['totalCount']
         else:
             oldPopularity = 1  # TODO Should be read from DB
+            databaseCount = 0
         alpha = 0.7 / 1.7
         beta = 1 / 1.7
         
         #newPopularity = alpha * oldPopularity + beta * dayPopularity
-        variables = self.__readVariablesFromDB(key)
-        if variables != None:
-                databaseCount = variables['totalCount']
         oldPopularity = databaseCount * oldPopularity        
         newPopularity = (alpha * oldPopularity) + (beta * dayPopularity)
         
         #now map this popularity from 0 to 100
+        DBQuery.openConnection();
         query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s" % key[0]
         results = DBQuery.queryDB(query)
+        DBQuery.closeConnection();
         if len(results) > 0:
             row = results[0]
             dbSpotCount = int(row[0])
