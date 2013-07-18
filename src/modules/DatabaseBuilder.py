@@ -282,12 +282,11 @@ class DatabaseBuilder():
         else:
             oldPopularity = 100
             databaseCount = 0
-        alpha = 1.6 / 2
-        beta = 0.4 / 2
+        alpha = 0.9
         
         #newPopularity = alpha * oldPopularity + beta * dayPopularity
-        oldPopularity = databaseCount * oldPopularity / 100        
-        newPopularity = (alpha * oldPopularity) + (beta * dayPopularity)
+        oldPopularity = databaseCount * oldPopularity / 100
+        newPopularity = (alpha * oldPopularity) + dayPopularity
         
         #now map this popularity from 0 to 100
         query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s" % key[0]
