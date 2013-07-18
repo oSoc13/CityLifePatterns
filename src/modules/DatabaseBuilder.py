@@ -251,7 +251,6 @@ class DatabaseBuilder():
         
         dayPopularity = dayCount * masterMultiplier
         print "daypop: %s | dayCount: %s" % (dayPopularity, dayCount);
-        #DBQuery.openConnection();
         variables = self.__readVariablesFromDB(key)
         if variables != None:
             oldPopularity = variables['weightedPopularity']
@@ -269,12 +268,9 @@ class DatabaseBuilder():
         #now map this popularity from 0 to 100
         query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s" % key[0]
         results = DBQuery.queryDB(query)
-        print results
-        #DBQuery.closeConnection();
         if len(results)> 0:
             row = results[0]
             if row[0] != None:
-                print row[0]
                 dbSpotCount = int(row[0])
             else:
                 dbSpotCount = 0
@@ -283,7 +279,7 @@ class DatabaseBuilder():
         
         mappedNewPopularity = newPopularity / (dbSpotCount+dayCount)* 100
         if key == (7,32):
-            print "%s = newPopularity / (%s+%s)* 100" % (mappedNewPopularity, dbSpotCount, dayCount)
+            print "%s = %s / (%s+%s)* 100" % (mappedNewPopularity, newPopularity, dbSpotCount, dayCount)
         newPopularity = mappedNewPopularity
         
         print "oldpop: %s | daypop: %s | newpop: %s" % (oldPopularity, dayPopularity, newPopularity)
