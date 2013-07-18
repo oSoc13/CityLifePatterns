@@ -4,10 +4,11 @@
 # Copyright OKFN Belgium
 # 
 ###################################
-import json
-import requests     # HTTP library
 import datetime
 import os.path
+import json
+import requests     # HTTP library
+import config
 ###################################
 
 
@@ -20,34 +21,14 @@ class VikingSpotsApiWrapper:
     # It can be used to easily execute VikingSpots API calls.
     ##################################################################
     token = ''        # Holds the token that will be used in API calls
-    __urls = {}       # Holds the URL for all used API calls
+    __urls = {}       # Holds the URLs for all used API calls
 
 
     # Constructor
     ##############################################################
     def __init__(self):
-        self.__readTokenFromFile()
-        self.__readUrlsFromFile()
-
-    def __readTokenFromFile(self):
-        file = open(os.path.join(modulesDir, 'vikingtoken'))
-        fileContents = file.read()
-        entries = fileContents.split('=')
-        self.token = self.__removeNewLine(entries[1])
-
-    def __readUrlsFromFile(self):
-        file = open(os.path.join(modulesDir, 'urls'))
-        lines = file.readlines()
-        for line in lines:
-            line = self.__removeNewLine(line)
-            pair = line.split('=')
-            key = pair[0]
-            value = pair[1]
-            self.__urls[key] = value
-
-    def __removeNewLine(self, str):
-        if str.endswith('\n'):
-            return str[:-1]
+        self.token = config.token
+        self.__urls = config.urls
 
 
     # API Calls
