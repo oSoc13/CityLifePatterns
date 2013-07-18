@@ -282,7 +282,7 @@ class DatabaseBuilder():
         else:
             oldPopularity = 100
             databaseCount = 0
-        alpha = 0.9
+        alpha = 0.98610504505626862362870014782646988377886953285508999
         
         #newPopularity = alpha * oldPopularity + beta * dayPopularity
         oldPopularity = databaseCount * oldPopularity / 100
