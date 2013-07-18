@@ -267,17 +267,18 @@ class DatabaseBuilder():
         
         #now map this popularity from 0 to 100
         DBQuery.openConnection();
-        query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s" % key[0]
+        query = "my %s" % key[0]
         results = DBQuery.queryDB(query)
         print results
         DBQuery.closeConnection();
-        if len(results) > 0:
-            row = results[0]
+        if len(results)> 0:
+            row = results0]
+            print row[0]
             dbSpotCount = int(row[0])
         else:
             dbSpotCount = 0
         
-        mappedNewPopularity = newPopularity / dbSpotCount * 100
+        mappedNewPopularity = newPopularity / (dbSpotCount* dayCount)* 100
         newPopularity = mappedNewPopularity
         
         print "oldpop: %s | daypop: %s | newpop: %s" % (oldPopularity, dayPopularity, newPopularity)
