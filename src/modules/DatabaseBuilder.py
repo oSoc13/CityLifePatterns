@@ -251,6 +251,7 @@ class DatabaseBuilder():
         
         dayPopularity = dayCount * masterMultiplier
         print "daypop: %s | dayCount: %s" % (dayPopularity, dayCount);
+        DBQuery.openConnection();
         variables = self.__readVariablesFromDB(key)
         if variables != None:
             oldPopularity = variables['weightedPopularity']
@@ -266,7 +267,6 @@ class DatabaseBuilder():
         newPopularity = (alpha * oldPopularity) + (beta * dayPopularity)
         
         #now map this popularity from 0 to 100
-        DBQuery.openConnection();
         query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s" % key[0]
         results = DBQuery.queryDB(query)
         print results
