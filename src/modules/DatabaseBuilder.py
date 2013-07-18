@@ -190,7 +190,7 @@ class DatabaseBuilder():
             return 2
         # spotAge / oldestSpotAge -> normalizes range to 0-1
         # normalized * 2          -> expands range to 0-2
-        multiplier = 1 / ( ((float(spotAge)) / float(oldestAge)) * self.__multiplierRanges['spotAge'] )
+        multiplier = ( (1 / (float(spotAge)) / float(oldestAge)) * self.__multiplierRanges['spotAge'] )
         print "multiplier: %s ; range: %s ; age: %s" % (multiplier, self.__multiplierRanges['spotAge'], float(spotAge) )
         return multiplier
 
