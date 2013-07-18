@@ -28,7 +28,7 @@ class DatabaseBuilder():
 
     # Settings
     __multiplierRanges = {'spotAge': 2, 'timeSpent': 2}
-    __weights = {'spotAge': 0.3, 'timeSpent': 0.7}     # Sum must be 1
+    __weights = {'spotAge': 0.0, 'timeSpent': 1}     # Sum must be 1
 
     # The build functions
     ##############################################################
