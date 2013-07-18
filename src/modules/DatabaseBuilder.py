@@ -82,13 +82,13 @@ class DatabaseBuilder():
 
     def updateDb(self, spotMapping):
         allDbKeys = self.__getAllKeys()
+        Multipliers={}
         if allDbKeys != None:
             for row in allDbKeys:
                 columns = {'totalCount': int(row[3]), 'spotCreationDate': row[4], 'lastOccurrence': row[5], 'MtimeSpent': float(row[9]), 'oldPopularity': float(row[10])}
                 columns["spotAge"]=self.__calculateSpotAge(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),columns['spotCreationDate'])
                 
                 DbKey = (int(row[1]),int(row[2]))
-                Multipliers={}
                 if None == spotMapping.get(DbKey):
                     ##degrade ageWeight anyhow and recalculate weightedPopularity
                     oldestSpotAge = self.__calculateSpotAge(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), self.creationDateOldestSpot)
