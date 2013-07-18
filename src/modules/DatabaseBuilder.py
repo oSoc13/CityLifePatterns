@@ -272,7 +272,7 @@ class DatabaseBuilder():
         print results
         DBQuery.closeConnection();
         if len(results)> 0:
-            row = results0]
+            row = results[0]
             print row[0]
             dbSpotCount = int(row[0])
         else:
