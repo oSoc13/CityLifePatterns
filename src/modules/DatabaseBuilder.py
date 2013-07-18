@@ -28,7 +28,7 @@ class DatabaseBuilder():
 
     # Settings
     __multiplierRanges = {'spotAge': 2, 'timeSpent': 2}
-    __weights = {'spotAge': 0.5, 'timeSpent': 0.5}     # Sum must be 1
+    __weights = {'spotAge': 0.3, 'timeSpent': 0.7}     # Sum must be 1
 
     # The build functions
     ##############################################################
@@ -248,8 +248,11 @@ class DatabaseBuilder():
 
         masterMultiplier = self.__weights['spotAge'] * multipliers['MspotAge'] + \
                            self.__weights['timeSpent'] * multipliers['MtimeSpent']
-
+        
+        print "mm: %s | am: %s |tm %s" % (masterMultiplier, self.__weights['spotAge'] * multipliers['MspotAge'], self.__weights['timeSpent'] * multipliers['MtimeSpent'])
+        
         dayPopularity = dayCount * masterMultiplier
+        print "daypop: %s | dayCount: %s"
         variables = self.__readVariablesFromDB(key)
         if variables != None:
             oldPopularity = variables['weightedPopularity']
@@ -258,6 +261,7 @@ class DatabaseBuilder():
         alpha = 0.7
         beta = 0.3
         newPopularity = (alpha * oldPopularity) + (beta * dayPopularity)
+        print "oldpop: %s | daypop: %s | newpop: %s" % (oldPopularity, dayPopularity, newPopularity)
         return newPopularity
 
     # Helper functions
