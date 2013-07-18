@@ -267,7 +267,7 @@ class DatabaseBuilder():
         
         #now map this popularity from 0 to 100
         DBQuery.openConnection();
-        query = "my %s" % key[0]
+        query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s" % key[0]
         results = DBQuery.queryDB(query)
         print results
         DBQuery.closeConnection();
