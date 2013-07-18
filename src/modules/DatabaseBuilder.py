@@ -280,7 +280,7 @@ class DatabaseBuilder():
             oldPopularity = variables['weightedPopularity']
             databaseCount = variables['totalCount']
         else:
-            oldPopularity = 1  # TODO Should be read from DB
+            oldPopularity = 100
             databaseCount = 0
         alpha = 0.7 / 1.7
         beta = 1 / 1.7
