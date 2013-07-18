@@ -19,7 +19,7 @@ import DBQuery
 class DatabaseBuilder():
     lastRun = ''
     endOfCurrentRun = ''
-
+    creationDateOldestSpot = "2011-11-25 17:34:05" # Hardcoded, comes from spot with id=2
     __vsApi = VikingSpotsApiWrapper()
 
     # Data that should come from DB or from file
@@ -75,11 +75,30 @@ class DatabaseBuilder():
                     #print "\nDidn't find any spot mappings today... :("
                     #else:
                     #print "No checkins today, moving on..."
-
+                self.updateDb(spotMapping)
             dt1 = dt2
             dt2 = dt1 + datetime.timedelta(days=1)
             #print "\nTerminating..."
 
+    def updateDb(self, spotMapping):
+        allDbKeys = self.__getAllKeys()
+        if allDbKeys != None:
+            for row in allDbKeys:
+                columns = {'totalCount': int(row[3]), 'spotCreationDate': row[4], 'lastOccurrence': row[5], 'MtimeSpent': float(row[9]), 'oldPopularity': float(row[10])}
+                columns["spotAge"]=self.__calculateSpotAge(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),columns['spotCreationDate'])
+                
+                DbKey = (int(row[1]),int(row[2]))
+                Multipliers={}
+                if None == spotMapping.get(DbKey):
+                    ##degrade ageWeight anyhow and recalculate weightedPopularity
+                    oldestSpotAge = self.__calculateSpotAge(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), self.creationDateOldestSpot)
+                    Multipliers[DbKey]={}
+                    Multipliers[DbKey]['MspotAge'] = self.__calculateNewSpotAgeMultiplier(columns, oldestSpotAge)
+                    Multipliers[DbKey]['MtimeSpent'] = columns['MtimeSpent']
+                    
+                    Multipliers[DbKey]['weightedPopularity'] = self.__calculateNewWeightedPopularity(Multipliers[DbKey], 0, DbKey)
+            updateDb(Multipliers)
+    
     def updateSinceLastRun(self):
         # TODO Put night script contents here
         return
@@ -98,16 +117,23 @@ class DatabaseBuilder():
         dbRows = {}
         weightedPopularity = {}
         DBQuery.openConnection();
+
         for key in parameters:
             weightedPopularity[key] = {}
             weightedPopularity[key]['weightedPopularity'] = self.__calculateNewWeightedPopularity(
                 newMultipliers[key],
                 parameters[key]['dayCount'],key)
+            
             parameters[key].pop('variance', None)
             parameters[key].pop('averageTimeSpent', None)
             parameters[key].pop('MtimeSpent', None)
             dbRows[key] = dict(parameters[key].items() + newMultipliers[key].items() + \
                                weightedPopularity[key].items())
+            
+        #for key not IN parameters
+        #calculate ageweight
+        #newMultipliers[key]['MspotAge'] = self.__calculateNewSpotAgeMultiplier(parameters[key], oldestSpotAge)
+            
         DBQuery.closeConnection();
         return dbRows
 
@@ -197,8 +223,7 @@ class DatabaseBuilder():
     # Calculate new multipliers
     def __calculateNewMultipliers(self, parameters):
         newMultipliers = {} # (spotId,nextSpotId) | MspotAge | MlastOccurrence | .. timeSpentW
-        creationDateOldestSpot = "2011-11-25 17:34:05" # Hardcoded, comes from spot with id=2
-        oldestSpotAge = self.__calculateSpotAge(now, creationDateOldestSpot)
+        oldestSpotAge = self.__calculateSpotAge(now, self.creationDateOldestSpot)
 
         DBQuery.openConnection();
         for key in parameters:
@@ -250,7 +275,6 @@ class DatabaseBuilder():
                            self.__weights['timeSpent'] * multipliers['MtimeSpent']
         
         dayPopularity = dayCount * masterMultiplier
-        print "daypop: %s | dayCount: %s" % (dayPopularity, dayCount);
         variables = self.__readVariablesFromDB(key)
         if variables != None:
             oldPopularity = variables['weightedPopularity']
@@ -278,8 +302,6 @@ class DatabaseBuilder():
             dbSpotCount = 0
         
         mappedNewPopularity = newPopularity / (dbSpotCount+dayCount)* 100
-        if key == (7,32):
-            print "%s = %s / (%s+%s)* 100" % (mappedNewPopularity, newPopularity, dbSpotCount, dayCount)
         newPopularity = mappedNewPopularity
         
         print "oldpop: %s | daypop: %s | newpop: %s" % (oldPopularity, dayPopularity, newPopularity)
@@ -319,6 +341,18 @@ class DatabaseBuilder():
             variables = {'totalCount': int(row[0]), 'storedAverageVariance': float(row[1]),
                          'storedAverageTimeSpent': float(row[2]), 'oldMultiplier': float(row[3]), 'weightedPopularity': float(row[4])}
             return variables
+        else:
+            return None
+    
+    def __getAllKeys(self):
+        
+        DBQuery.openConnection();
+        query = "SELECT * FROM whatsnext"
+        results = DBQuery.queryDB(query)
+        DBQuery.openConnection();
+
+        if len(results) > 0:
+            return results
         else:
             return None
 
