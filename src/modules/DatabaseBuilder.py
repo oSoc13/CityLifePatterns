@@ -249,10 +249,10 @@ class DatabaseBuilder():
         masterMultiplier = self.__weights['spotAge'] * multipliers['MspotAge'] + \
                            self.__weights['timeSpent'] * multipliers['MtimeSpent']
         
-        print "mm: %s | am: %s |tm %s" % (masterMultiplier, self.__weights['spotAge'] * multipliers['MspotAge'], self.__weights['timeSpent'] * multipliers['MtimeSpent'])
+        print "masterm: %s | agem: %s |timem %s" % (masterMultiplier, self.__weights['spotAge'] * multipliers['MspotAge'], self.__weights['timeSpent'] * multipliers['MtimeSpent'])
         
         dayPopularity = dayCount * masterMultiplier
-        print "daypop: %s | dayCount: %s"
+        print "daypop: %s | dayCount: %s" % (dayPopularity, dayCount)
         variables = self.__readVariablesFromDB(key)
         if variables != None:
             oldPopularity = variables['weightedPopularity']
