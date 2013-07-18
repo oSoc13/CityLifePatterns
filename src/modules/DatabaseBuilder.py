@@ -258,8 +258,8 @@ class DatabaseBuilder():
             oldPopularity = variables['weightedPopularity']
         else:
             oldPopularity = 1  # TODO Should be read from DB
-        alpha = 0.7
-        beta = 0.3
+        alpha = 0.7 / 1.7
+        beta = 1 / 1.7
         newPopularity = (alpha * oldPopularity) + (beta * dayPopularity)
         print "oldpop: %s | daypop: %s | newpop: %s" % (oldPopularity, dayPopularity, newPopularity)
         return newPopularity
