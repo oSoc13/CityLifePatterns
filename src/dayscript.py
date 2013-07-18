@@ -40,7 +40,7 @@ if spot == None:
     print "\nSpot with ID %d doesn't exist." % spotId
 else:
     print "\nGetting next probable spots for spot: %s" % spot.name
-    topNextSpots = api.getPopularNextSpots(spotId, nrSpots)
+    topNextSpots = api.getPopularNextSpotsJSON(spotId, nrSpots)
     nrSpotsFound = len(topNextSpots)
 
     if nrSpotsFound > 0:

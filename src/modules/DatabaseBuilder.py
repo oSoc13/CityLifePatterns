@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #
-# Author: Linsey Raymaekers
+# Authors: Linsey Raymaekers
+#          Wouter Vandenneucker
 # Copyright OKFN Belgium
 #
 # Testing class
@@ -23,10 +24,10 @@ class DatabaseBuilder():
     __vsApi = VikingSpotsApiWrapper()
 
     # Data that should come from DB or from file
-    __oldMultipliers = {}
-    __spotCreationDates = {}
+    __spots = {}
 
     # Settings
+    # TODO should be configured from file
     __multiplierRanges = {'spotAge': 2, 'timeSpent': 2}
     __weights = {'spotAge': 0.5, 'timeSpent': 0.5}     # Sum must be 1
 
@@ -122,9 +123,11 @@ class DatabaseBuilder():
         for checkin in checkins:
             nextCheckin = self.__findNextCheckin(checkin.user_id, checkins, i)
             i += 1
-            if nextCheckin is not None and nextCheckin.spot_id != checkin.spot_id:
+            if (nextCheckin is not None) and (nextCheckin.spot_id != checkin.spot_id):
                 spotId = checkin.spot_id
                 nextSpotId = nextCheckin.spot_id
+                if nextSpotId not in self.__spots:
+                    self.__spots[nextSpotId] = self.__vsApi.getSpotById(spotId)
                 key = (spotId,nextSpotId)
                 now = nextCheckin.created_on  # In non-simulation, use current time
                 timeSpent = self.__calculateTimeSpent(checkin.created_on, nextCheckin.created_on)
@@ -156,11 +159,9 @@ class DatabaseBuilder():
                     parameters[key]["MtimeSpent"] = timeMultiplier
 
                 else:
-                    if nextSpotId not in self.__spotCreationDates:
-                        self.__spotCreationDates[nextSpotId] = str(self.__vsApi.getSpotCreationDate(spotId))
-                    spotAge = self.__calculateSpotAge(nextCheckin.created_on, self.__spotCreationDates[nextSpotId])
+                    spotAge = self.__calculateSpotAge(nextCheckin.created_on, self.__spots[nextSpotId].created_on)
                     parameters[key] = { 'dayCount': 1,
-                                        'spotCreationDate': self.__spotCreationDates[nextSpotId],
+                                        'spotCreationDate': self.__spots[nextSpotId].created_on,
                                         'lastOccurrence': nextCheckin.created_on,
                                         'spotAge': spotAge,
                                         'variance': 0.0,

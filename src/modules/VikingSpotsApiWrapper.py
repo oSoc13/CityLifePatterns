@@ -76,7 +76,8 @@ class VikingSpotsApiWrapper:
             spotJSON = json.dumps(jsonData['response']) # spotJSON = string
             return spotJSON
         else:
-            return None
+            # TODO return a proper JSON with the error code that occurred
+            return json.dumps(jsonData['meta']['code'])
 
     # Sends URL to VikingSpots API and returns response as json
     def __getSpotDataAsJson(self, spotId):

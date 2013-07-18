@@ -14,75 +14,34 @@ class WhatsNextApi:
 
     # Functions for getting "what's next?" spots
     ###################################################################
-    # This function returns the nth most popular next spots from the
-    # nextSpotCount database.
-    # QUERY
-    #   for spotId, return n spots with highest count
-    # Called by API to return JSON data
-    def getPopularNextSpots(self, spotId, nrSpots):
-        queryString = 'SELECT nextSpotId, count FROM nextSpotCount '\
-                      'WHERE spotId = %d ORDER BY count DESC LIMIT 0, %d' % (spotId, nrSpots)
-        DBQuery.openConnection();
-        returnedResults = DBQuery.queryDB(queryString)
-        DBQuery.closeConnection();
+    #   Called by API to get spots as JSON string
+    #   These function return the nth most popular next spots from the whatsnext database.
+    #   Each function returns spots based on different multipliers (for testing purposes), see comment at each function.
 
-        topNextSpots = []
-        for row in returnedResults:
-            topNextSpots.append(row)
-        return topNextSpots
-
-    # Must return string
+    # Uses all weights
     def getPopularNextSpotsJSON(self, spotId, nrSpots):
-        DBQuery.openConnection();
-        queryString = 'SELECT nextSpotId, totalCount FROM whatsnext ' \
+        query = 'SELECT nextSpotId FROM whatsnext ' \
                       'WHERE spotId = %d ' \
                       'ORDER BY weightedPopularity DESC LIMIT 0, %d' % (spotId, nrSpots)
-        returnedResults = DBQuery.queryDB(queryString)
-        DBQuery.closeConnection();
+        return self.__resultsOfQueryAsJson(query)
 
-        nextSpots = []
-        for row in returnedResults:
-            nextSpots.append(row)
-        return self.__formJsonResponse(nextSpots)
-
-    # Must return string
+    # Uses only the total count per spot mapping
     def getPopularNextSpotsByCountJSON(self, spotId, nrSpots):
-        DBQuery.openConnection();
-        queryString = 'SELECT nextSpotId, count FROM nextSpotCount '\
-                      'WHERE spotId = %d ORDER BY count DESC LIMIT 0, %d' % (spotId, nrSpots)
-        returnedResults = DBQuery.queryDB(queryString)
-        DBQuery.closeConnection();
+        query = 'SELECT nextSpotId FROM whatsnext '\
+                      'WHERE spotId = %d ORDER BY totalCount DESC LIMIT 0, %d' % (spotId, nrSpots)
+        return self.__resultsOfQueryAsJson(query)
 
-        nextSpots = []
-        for row in returnedResults:
-            nextSpots.append(row)
-        return self.__formJsonResponse(nextSpots)
-
-    # Must return string
+    # Uses only the spot age weight
     def getPopularNextSpotsBySpotAgeJSON(self, spotId, nrSpots):
-        DBQuery.openConnection();
-        queryString = 'SELECT nextSpotId, totalCount FROM whatsnext '\
+        query = 'SELECT nextSpotId FROM whatsnext '\
                       'WHERE spotId = %d ORDER BY (totalCount*MspotAge) DESC LIMIT 0, %d' % (spotId, nrSpots)
-        returnedResults = DBQuery.queryDB(queryString)
-        DBQuery.closeConnection();
+        return self.__resultsOfQueryAsJson(query)
 
-        nextSpots = []
-        for row in returnedResults:
-            nextSpots.append(row)
-        return self.__formJsonResponse(nextSpots)
-
-    # Must return string
-    def getPopularNextSpotsBySpotAgeJSON(self, spotId, nrSpots):
-        DBQuery.openConnection();
-        queryString = 'SELECT nextSpotId, totalCount FROM whatsnext '\
+    # Uses only the time spent weight
+    def getPopularNextSpotsByTimeSpentJSON(self, spotId, nrSpots):
+        query = 'SELECT nextSpotId FROM whatsnext '\
                       'WHERE spotId = %d ORDER BY (totalCount*MtimeSpent) DESC LIMIT 0, %d' % (spotId, nrSpots)
-        returnedResults = DBQuery.queryDB(queryString)
-        DBQuery.closeConnection();
-
-        nextSpots = []
-        for row in returnedResults:
-            nextSpots.append(row)
-        return self.__formJsonResponse(nextSpots)
+        return self.__resultsOfQueryAsJson(query)
 
 
     # MISC.
@@ -99,31 +58,43 @@ class WhatsNextApi:
 
     # Helper Functions
     ###################################################################
-    # TODO! This is not sorted D: FIX!
-    def __formJsonSpotsArray(self, nextSpots):
-        JSON = ''
-        JSON += '\'spots\': [ '
-        for (spotId,count) in nextSpots:
-            spotJSON = self.__vsApi.getSpotByIdJSON(spotId)
-            if spotJSON is not None:
-                JSON += spotJSON
-                JSON += ', '
-        JSON = JSON[:-2]
-        JSON += '] '
-        return JSON
+    def __resultsOfQueryAsJson(self, query, userToken=''):
+        DBQuery.openConnection();
+        results = DBQuery.queryDB(query)
+        DBQuery.closeConnection();
+
+        nextSpots = []
+        for row in results:
+            nextSpots.append(row)
+        return self.__formJsonResponse(nextSpots)
 
     def __formJsonResponse(self, nextSpots):
         nrSpots = len(nextSpots)
         JSON = '{ '
-        JSON += '\'meta\': { \'code\': \'200\' }, '
-        JSON += '\'response\': { '
+        JSON += '\"meta\": { \"code\": \"200\" }, '
+        JSON += '\"response\": { '
         if nrSpots > 1:
-            JSON +='\'count\': \'%d\', ' % nrSpots
+            JSON +='\"count\": \"%d\", ' % nrSpots
             JSON += self.__formJsonSpotsArray(nextSpots)
         else:
-            JSON +='\'count\': 0 '
+            JSON +='\"count\": 0 '
         JSON += '} }'
         return JSON
+
+    # TODO! This is not sorted D: FIX!
+    def __formJsonSpotsArray(self, nextSpots):
+        JSON = ''
+        JSON += '\"spots\": [ '
+        for spotId in nextSpots:
+            spotJSON = self.__vsApi.getSpotByIdJSON(spotId)
+            if spotJSON is not None:
+                JSON += spotJSON
+                JSON += ', '
+
+        JSON = JSON[:-2]
+        JSON += '] '
+        return JSON
+
 
 
     # Unused functions
