@@ -296,9 +296,9 @@ class DatabaseBuilder():
             if row[0] != None:
                 dbSpotCount = int(row[0])
             else:
-                dbSpotCount = 0
+                dbSpotCount = 1
         else:
-            dbSpotCount = 0
+            dbSpotCount = 1 
         
         mappedNewPopularity = newPopularity / (dbSpotCount)* 100
         newPopularity = mappedNewPopularity
