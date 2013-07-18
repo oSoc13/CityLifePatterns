@@ -28,7 +28,7 @@ class DatabaseBuilder():
 
     # Settings
     __multiplierRanges = {'spotAge': 2, 'timeSpent': 2}
-    __weights = {'spotAge': 0.0, 'timeSpent': 1}     # Sum must be 1
+    __weights = {'spotAge': 0.0, 'timeSpent': 1.0}     # Sum must be 1
 
     # The build functions
     ##############################################################
@@ -303,7 +303,7 @@ class DatabaseBuilder():
         mappedNewPopularity = newPopularity / (dbSpotCount+dayCount)* 100
         newPopularity = mappedNewPopularity
         
-        print "oldpop: %s | daypop: %s | newpop: %s" % (oldPopularity, dayPopularity, newPopularity)
+        print "oldpop: %s | daypop: %s | newpop: %s | age: %s | time: %s" % (oldPopularity, dayPopularity, newPopularity,  multipliers['MspotAge'], multipliers['MtimeSpent'])
         return newPopularity
 
     # Helper functions
