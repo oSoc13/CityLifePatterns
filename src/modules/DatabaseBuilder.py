@@ -249,8 +249,6 @@ class DatabaseBuilder():
         masterMultiplier = self.__weights['spotAge'] * multipliers['MspotAge'] + \
                            self.__weights['timeSpent'] * multipliers['MtimeSpent']
         
-        print "masterm: %s | agem: %s |timem %s" % (masterMultiplier, self.__weights['spotAge'] * multipliers['MspotAge'], self.__weights['timeSpent'] * multipliers['MtimeSpent'])
-        
         dayPopularity = dayCount * masterMultiplier
         print "daypop: %s | dayCount: %s" % (dayPopularity, dayCount)
         variables = self.__readVariablesFromDB(key)
@@ -260,7 +258,26 @@ class DatabaseBuilder():
             oldPopularity = 1  # TODO Should be read from DB
         alpha = 0.7 / 1.7
         beta = 1 / 1.7
+        
+        #newPopularity = alpha * oldPopularity + beta * dayPopularity
+        variables = self.__readVariablesFromDB(key)
+        if variables != None:
+                databaseCount = variables['totalCount']
+        oldPopularity = databaseCount * oldPopularity        
         newPopularity = (alpha * oldPopularity) + (beta * dayPopularity)
+        
+        #now map this popularity from 0 to 100
+        query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s" % key[0]
+        results = DBQuery.queryDB(query)
+        if len(results) > 0:
+            row = results[0]
+            dbSpotCount = int(row[0])
+        else:
+            dbSpotCount = 0
+        
+        mappedNewPopularity = newPopularity / dbSpotCount * 100
+        newPopularity = mappedNewPopularity
+        
         print "oldpop: %s | daypop: %s | newpop: %s" % (oldPopularity, dayPopularity, newPopularity)
         return newPopularity
 
