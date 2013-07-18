@@ -299,8 +299,9 @@ class DatabaseBuilder():
                 dbSpotCount = 0
         else:
             dbSpotCount = 0 
-        
-        mappedNewPopularity = newPopularity / (dbSpotCount+1)* 100
+        if dbSpotCount == 0:
+            dbSpotCount = 1
+        mappedNewPopularity = newPopularity / (dbSpotCount)* 100
         newPopularity = mappedNewPopularity
         
         print "oldpop: %s | daypop: %s | newpop: %s | age: %s | time: %s" % (oldPopularity, dayPopularity, newPopularity,  multipliers['MspotAge'], multipliers['MtimeSpent'])
