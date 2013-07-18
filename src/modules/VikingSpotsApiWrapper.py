@@ -27,6 +27,7 @@ class VikingSpotsApiWrapper:
     # Constructor
     ##############################################################
     def __init__(self):
+        # TODO should probably do some syntax checking here
         self.token = config.token
         self.__urls = config.urls
 
@@ -79,14 +80,13 @@ class VikingSpotsApiWrapper:
 
     # Sends URL to VikingSpots API and returns response as json
     def __getSpotDataAsJson(self, spotId):
-        url = self.__urls['spotByIdRequest']
+        url = self.__urls['importSpotByIdRequest']
         params = {'bearer_token': self.token, 'spot_id': spotId}
         resp = requests.get(url, params=params, verify=False)
         return resp.json()
 
-    # Returns spot creation data as string
+    # Returns spot creation date as string
     # Uses another API call which includes spot creation date
-    # TODO change getSpotDataAsJson  to use importSpotByIdRequest, then it already includes the spot creation date
     def getSpotCreationDate(self, spotId):
         url = self.__urls['importSpotByIdRequest']
         params = {'bearer_token': self.token, 'spot_id': spotId}
@@ -144,6 +144,7 @@ class Spot():
     id = 0
     ll = [0.0,0.0]         # lat,long
     name = ''
+    created_on = ''
     private = False
     json = {}
 
@@ -152,6 +153,7 @@ class Spot():
         self.ll = [json['latitude'], json['longitude']]
         self.name = json['name']
         self.private = json['private']
+        self.created_on = json['created_on']
         self.json = json
 
     def toStr(self):
