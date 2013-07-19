@@ -16,7 +16,7 @@ from WhatsNextApi import *
 api = WhatsNextApi()
 
 def showDayCheckins(request):
-    checkins = api.getDayCheckins()
+    checkins = api.__getDayCheckins()
 
     file = open('../showDayCheckins.html')
     template = Template(file.read())
