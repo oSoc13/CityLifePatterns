@@ -217,7 +217,7 @@ class DatabaseBuilder():
         # spotAge / oldestSpotAge -> normalizes range to 0-1
         # normalized * 2          -> expands range to 0-2
         
-        multiplier = (((float(oldestAge)-float(spotAge)) / float(oldestAge))* self.__multiplierRanges['spotAge'] )
+        multiplier = (((float(oldestAge)-float(spotAge)) / float(oldestAge)) ) + 1
         return multiplier
 
     # Calculate new multipliers
@@ -274,6 +274,19 @@ class DatabaseBuilder():
         masterMultiplier = self.__weights['spotAge'] * multipliers['MspotAge'] + \
                            self.__weights['timeSpent'] * multipliers['MtimeSpent']
         
+        
+         #now map this popularity from 0 to 100
+        query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s and nextSpotId = %s" % (key[0],key[1])
+        results = DBQuery.queryDB(query)
+        if len(results)> 0:
+            row = results[0]
+            if row[0] != None:
+                dbSpotCount = int(row[0])
+            else:
+                dbSpotCount = 0
+        else:
+            dbSpotCount = 0
+        
         dayPopularity = dayCount * masterMultiplier
         variables = self.__readVariablesFromDB(key)
         if variables != None:
@@ -288,17 +301,9 @@ class DatabaseBuilder():
         oldPopularity = databaseCount * oldPopularity / 100
         newPopularity = (alpha * oldPopularity) + dayPopularity
         
-        #now map this popularity from 0 to 100
-        query = "SELECT sum(totalCount) FROM whatsnext WHERE spotId = %s and nextSpotId = %s" % (key[0],key[1])
-        results = DBQuery.queryDB(query)
-        if len(results)> 0:
-            row = results[0]
-            if row[0] != None:
-                dbSpotCount = int(row[0])
-            else:
-                dbSpotCount = 0
-        else:
-            dbSpotCount = 0
+        if databaseCount == 0:
+            newPopularity = dayPopularity / (dbSpotCount+dayCount)
+        
         
         mappedNewPopularity = newPopularity / (dbSpotCount+dayCount)* 100
         newPopularity = mappedNewPopularity
