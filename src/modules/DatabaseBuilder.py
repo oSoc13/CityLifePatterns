@@ -299,13 +299,16 @@ class DatabaseBuilder():
         
         #newPopularity = alpha * oldPopularity + beta * dayPopularity
         oldPopularity = databaseCount * oldPopularity / 100
+        if dbSpotCount != 0:
+            alpha = alpha * (databaseCount/dbSpotCount)
         newPopularity = (alpha * oldPopularity) + dayPopularity
         
         if databaseCount == 0:
-            newPopularity = dayPopularity / (dbSpotCount+dayCount)
+            newPopularity = dayPopularity / (dbSpotCount+1)
         
         
-        mappedNewPopularity = newPopularity / (dbSpotCount+dayCount)* 100
+        
+        mappedNewPopularity = newPopularity / (dbSpotCount+1)* 100
         newPopularity = mappedNewPopularity
         
         print "oldpop: %s | daypop: %s | newpop: %s | age: %s | time: %s" % (oldPopularity, dayPopularity, newPopularity,  multipliers['MspotAge'], multipliers['MtimeSpent'])
