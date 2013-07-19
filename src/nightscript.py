@@ -1,99 +1,79 @@
 #!/usr/bin/python
 #
+# This is the night script that is responsible for building the database.
+#
+# Takes 1 argument to specify in which mode to run:
+#
+#   1) 'rebuild': Rebuild the database from scratch. This will
+#       - truncate the 'whatsnext' table in the 'vikingpatterns' database
+#       - rebuild it using all checkins since 2012-03-13 04:00:00
+#
+#       Rebuilding mimicks the update mode in that it processes checkins per day.
+#
+#   2) 'update': Update the database with checkins since the last run. This will
+#       - Update it using all checkins since the date specified in file 'lastrun'
+#
+# NOTES:
+#   - All dates are expected to be in this format: %Y-%m-%d %H:%M:%S, with leading zeros!
+#   - The file 'lastrun' is expected to be in same directory as this file.
+#   - 'lastrun' file should only contain (without quotes): "Night script was last run on: 2012-03-17 04:00:00",
+#     with the date specified when it was last run. This will be updated each time the script runs in update mode.
+#   - Output generated in 'rebuild' mode can be controlled in file
+#     modules/DatabaseBuilder.py in function 'buildFromScratch()'
+#
+# Currently, the MySQL database looks like this:
+#
+#   Database: vikingpatterns
+#   table: whatsnext
+#    +--------------------+-------------+------+-----+---------+----------------+
+#   | Field              | Type        | Null | Key | Default | Extra          |
+#   +--------------------+-------------+------+-----+---------+----------------+
+#   | id                 | bigint(20)  | NO   | PRI | NULL    | auto_increment |
+#   | spotId             | int(11)     | NO   |     | NULL    |                |
+#   | nextSpotId         | int(11)     | NO   |     | NULL    |                |
+#   | totalCount         | bigint(20)  | NO   |     | NULL    |                |
+#   | spotCreationDate   | varchar(25) | NO   |     | NULL    |                |
+#   | lastOccurrence     | varchar(25) | NO   |     | NULL    |                |
+#   | variance           | bigint(20)  | NO   |     | NULL    |                |
+#   | averageTimeSpent   | bigint(20)  | NO   |     | NULL    |                |
+#   | MspotAge           | float       | NO   |     | NULL    |                |
+#   | MtimeSpent         | float       | NO   |     | NULL    |                |
+#   | weightedPopularity | float       | NO   |     | NULL    |                |
+#   +--------------------+-------------+------+-----+---------+----------------+
+#
+#
 # Author: Linsey Raymaekers
 # Copyright OKFN Belgium
 #
-# This is the night script that is responsible for updating the WhatsNext database on a daily basis.
-# It reads the date the script was last run from the file 'lastrun' and processes all checkins  up to
-# 24 hours after this date.
-#
-# The length of time spanned by the processing can be passed to the main function.
-#
-# The file 'lastrun' is expected to be in same directory as this file.
-#
 ###################################
 import sys
-sys.path.insert(0, './modules')    # Specify additional directory to load python modules from
-import writeToDb
+sys.path.insert(0, './modules')
 import DatabaseBuilder
 from DatabaseBuilder import *
 import os.path
-import time                
-import datetime             
-import calendar
 ###################################
 
 baseDir = os.path.dirname(os.path.abspath(__file__))
 dbBuilder = DatabaseBuilder()
-# Main
-###################################################################
-def main():
-    nightScriptStart()
-    print '\nLast run: %s' % dbBuilder.lastRun
-    print 'End of current run: %s' % dbBuilder.endOfCurrentRun
-    print '\nGetting day checkins...'
-    dayCheckins = dbBuilder.getDayCheckins()
-    nrCheckins = len(dayCheckins)
 
-    if nrCheckins > 0:
-        print '\nGot %d day checkins' % nrCheckins
-        print 'First checkin:  %s' % dayCheckins[0].created_on
-        print 'Last checkin: %s' % dayCheckins[nrCheckins-1].created_on
-        spotMapping = dbBuilder.buildSpotMapping(dayCheckins)
-        if len(spotMapping) > 0:
-            print '\n%d spot mappings found' % len(spotMapping)
-            print '\nWriting to DB...'
-            writeToDb.writeToDbNew(spotMapping)
-            print 'Done writing to DB!'
-        else:
-            print '\nNo spot mappings found today.'
-    else:
-        print '\nThere were no checkins today'
-    nightScriptEnd()
+args = sys.argv
+nrArgs = len(args)
+
+if nrArgs > 1:
+    dbBuilder = DatabaseBuilder()
+    if args[1] == 'rebuild':
+        print 'You are about to truncate the entire database, continue? Y/N'
+        char = sys.stdin.read(1)
+        if char == 'Y':
+            dbBuilder.buildFromScratch()
+        if char == 'N':
+            print 'Terminating...'
+    if args[1] == 'update':
+        dbBuilder.updateSinceLastRun(baseDir)
+else:
+    print 'No arguments given. Usage:'
+    print 'python nightscript.py rebuild (rebuilds database from scratch)'
+    print 'python nightscript.py update  (adds checkins since last run specified in \'lastrun\' file)'
 
 
-
-# Helper Functions
-###################################################################
-# Write current time to file 'lastrun' and
-# TODO should check for proper format in 'lastrun' file - error handling
-def nightScriptStart():
-    initializeStartAndEndTimes()
-    writeLastRunToFile()
-
-# Reads date of last run and calculates end of current run (= 24 hours ahead)
-def initializeStartAndEndTimes():
-    filepath = os.path.join(baseDir, 'lastrun')
-    if os.path.exists(filepath):
-        file = open(filepath)
-        fileContents = file.read()
-        entries = fileContents.split(': ')
-        lastRun = entries[1]
-        if (lastRun.endswith('\n')):
-            lastRun = lastRun[:-1]
-
-        # Calculate end of current run
-        date = datetime.datetime.strptime(lastRun, '%Y-%m-%d %H:%M:%S')
-        endDate = date + datetime.timedelta(days=1)
-        endOfCurrentRun = endDate.strftime('%Y-%m-%d %H:%M:%S')
-
-        dbBuilder.lastRun = lastRun
-        dbBuilder.endOfCurrentRun = endOfCurrentRun
-    else:
-        print 'No file \'lastrun\' found.'
-
-# Updates 'lastrun' file with end of current run
-def writeLastRunToFile():
-    filepath = os.path.join(baseDir, 'lastrun')
-    file = open(filepath, 'w')
-    contents = 'Night script was last run on: ' + dbBuilder.endOfCurrentRun
-    file.write(contents)
-
-# TODO Write away info about this run as necessary
-def nightScriptEnd():
-    print '\nTerminating...'
-    return
-
-
-main()
 

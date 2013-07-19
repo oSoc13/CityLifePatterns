@@ -2,9 +2,8 @@
 #
 # Authors: Linsey Raymaekers
 #          Wouter Vandenneucker
-# Copyright OKFN Belgium
 #
-# Testing class
+# Copyright OKFN Belgium
 #
 ###################################
 import sys
@@ -23,7 +22,8 @@ class DatabaseBuilder():
 
     __vsApi = VikingSpotsApiWrapper()
 
-    # Data that should come from DB or from file
+    # This data should come from DB, now API calls are made to locally store them during processing of checkins.
+    # (we need spot.created_on, spot.private per spot mapping tuple)
     __spots = {}
 
     # Settings
@@ -34,23 +34,23 @@ class DatabaseBuilder():
     # The build functions
     ##############################################################
     # This function builds the entire database from scratch.
-    # It starts with the first checkin in the data dump and processes
-    # all checkins on a per-day basis
+    # It starts with the first checkin in the data dump and processes all checkins on a per-day basis
+    # TODO make it write the date it ended to the file 'lastrun' so when the script runs in update mode,
+    # it will continue from that date.
     def buildFromScratch(self):
         startDate = "2012-03-13 04:00:00"
-        #endDate = "2014-04-01 00:00:00"
+        endDate = "2014-04-01 00:00:00"
 
-        startdt1 = datetime.datetime.strptime(startDate, '%Y-%m-%d %H:%M:%S')
-        dt1 = startdt1
+        startdt = datetime.datetime.strptime(startDate, '%Y-%m-%d %H:%M:%S')
+        enddt = datetime.datetime.strptime(endDate, '%Y-%m-%d %H:%M:%S')
+        nrDays = abs((enddt - startdt).days)        # Change this if you want to process a custom number of days
+
+        dt1 = startdt
         dt2 = dt1 + datetime.timedelta(days=1)
 
-        # TODO remove truncate when final version of db is made
-        DBQuery.openConnection();
-        DBQuery.queryDB("TRUNCATE whatsnext;")
-        DBQuery.closeConnection();
+        self.__truncateDatabase()
 
         # TODO change this so it spans all checkins
-        nrDays = 120
         for n in range(nrDays):
             date1 = dt1.strftime("%Y-%m-%d %H:%M:%S")
             date2 = dt2.strftime("%Y-%m-%d %H:%M:%S")
@@ -65,7 +65,7 @@ class DatabaseBuilder():
                 #print "Last checkin: %s" % checkins[nrCheckins-1].created_on
 
                 #### Call another function here to change what gets written to database
-                spotMapping = self.buildSpotMapping(checkins)
+                spotMapping = self.__buildSpotMapping(checkins)
                 ####
                 if len(spotMapping) > 1:
                     #print "\nFound %d spot mapping(s) today! \o/" % len(spotMapping)
@@ -81,17 +81,38 @@ class DatabaseBuilder():
             dt2 = dt1 + datetime.timedelta(days=1)
             #print "\nTerminating..."
 
-    def updateSinceLastRun(self):
-        # TODO Put night script contents here
-        return
+    def updateSinceLastRun(self, baseDir):
+        self.__nightScriptStart(baseDir)
+        print '\nLast run: %s' % self.lastRun
+        print 'End of current run: %s' % self.endOfCurrentRun
+        print '\nGetting day checkins...'
+        dayCheckins = self.__getDayCheckins()
+        nrCheckins = len(dayCheckins)
+
+        if nrCheckins > 0:
+            print '\nGot %d day checkins' % nrCheckins
+            print 'First checkin:  %s' % dayCheckins[0].created_on
+            print 'Last checkin: %s' % dayCheckins[nrCheckins-1].created_on
+            spotMapping = self.__buildSpotMapping(dayCheckins)
+            if len(spotMapping) > 0:
+                print '\n%d spot mappings found' % len(spotMapping)
+                print '\nWriting to DB...'
+                writeToDb.writeToDbNew(spotMapping)
+                print 'Done writing to DB!'
+            else:
+                print '\nNo spot mappings found today.'
+        else:
+            print '\nThere were no checkins today'
+        self.__nightScriptEnd()
 
     # Building the spot mapping
     ##############################################################
-    # Builds a spot mapping from the given checkins:
-    # (spotId,nextSpotId) | dayCount | lastOccurrence | MspotAge | MtimeSpent |
-    #                          int             date           float           float
-    # TODO make private when night script contents are in this file
-    def buildSpotMapping(self, checkins):
+    # Builds a spot mapping from the given checkins, create database rows:
+    # (spotId,nextSpotId) | dayCount | spotCreationDate | lastOccurrence | variance |
+    #                          int           date            float           float
+    #                       averageTimeSpent (min) | MspotAge | MtimeSpent | weightedPopularity (0-100)
+    #                          int                    int         float           float
+    def __buildSpotMapping(self, checkins):
         # Build today's parameters
         parameters = self.__calculateParameters(checkins)
         newMultipliers = self.__calculateNewMultipliers(parameters)
@@ -174,7 +195,7 @@ class DatabaseBuilder():
     # 'Today' is determined by lastRun and endOfCurrentRun(=24 hours ahead)
     # This allows us to simulate the adding of new checkins per day
     # Note: SQL Dump has all checkins before 2012-03-12 00:00:00
-    def getDayCheckins(self):
+    def __getDayCheckins(self):
         return self.__getAllCheckinsBetweenDates(self.lastRun, self.endOfCurrentRun)
 
     # TODO upgrade performance, currently ALL checkins are read from data dump at each call
@@ -311,11 +332,48 @@ class DatabaseBuilder():
         checkins = [checkin for checkin in checkins if checkin.created_on < date]
         return checkins
 
+    # Write current time to file 'lastrun'
+    # TODO should check for proper format in 'lastrun' file - error handling
+    def __nightScriptStart(self, baseDir):
+        self.__initializeStartAndEndTimes(baseDir)
+        self.__writeLastRunToFile(baseDir)
 
-dbBuilder = DatabaseBuilder()
+    # Reads date of last run and calculates end of current run (= 24 hours ahead)
+    def __initializeStartAndEndTimes(self, baseDir):
+        filepath = os.path.join(baseDir, 'lastrun')
+        if os.path.exists(filepath):
+            file = open(filepath)
+            fileContents = file.read()
+            entries = fileContents.split(': ')
+            lastRun = entries[1]
+            if lastRun.endswith('\n'):
+                lastRun = lastRun[:-1]
 
-# Uncomment if you want to refill the database
-dbBuilder.buildFromScratch()
+            # Calculate end of current run
+            date = datetime.datetime.strptime(lastRun, '%Y-%m-%d %H:%M:%S')
+            endDate = date + datetime.timedelta(days=1)
+            endOfCurrentRun = endDate.strftime('%Y-%m-%d %H:%M:%S')
 
-# Uncomment if you want to update since last day's checkins
-#dbBuilder.updateSinceLastRun
+            self.lastRun = lastRun
+            self.endOfCurrentRun = endOfCurrentRun
+        else:
+            print 'No file \'lastrun\' found.'
+
+    # Updates 'lastrun' file with end of current run
+    def __writeLastRunToFile(self, baseDir):
+        filepath = os.path.join(baseDir, 'lastrun')
+        file = open(filepath, 'w')
+        contents = 'Night script was last run on: ' + self.endOfCurrentRun
+        file.write(contents)
+
+    # TODO Write away info about this run as necessary
+    def __nightScriptEnd(self):
+        print '\nTerminating...'
+
+    # TODO Should probably do some error presentation here
+    def __truncateDatabase(self):
+        DBQuery.openConnection();
+        DBQuery.queryDB("TRUNCATE whatsnext;")
+        DBQuery.closeConnection();
+
+
